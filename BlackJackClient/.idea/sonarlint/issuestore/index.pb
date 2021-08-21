@@ -1,0 +1,23 @@
+
+B
+src/main/Main.java,f/e/fe03b4fd3afe162c6e01309b98a22588e093d274
+K
+src/domain/enums/Shape.java,4/e/4ebaa5c301addceada4c1c437f7111f7b3b84491
+D
+src/domain/Game.java,5/3/53f29b8d91600d5d34bef0a86c8f9fa36ece6b86
+P
+ src/main/TicTacToeTCPClient.java,5/6/56d179324ced4ca2d475f7964b391fe9c8b97d0f
+T
+$src/connection/PlayerInfoReader.java,5/1/512469cf5ebc2486a3a8afab743c12706e54a284
+F
+src/domain/Player.java,7/c/7ce1d0985c44bdbcdbc566ddd166f28bbd070e7e
+[
++src/communication/CommunicationHandler.java,2/c/2c0ecc3c0af6e375964fa50901103182db7c3c1f
+I
+src/game/GameManager.java,b/5/b5fb58f6636dc47e351cad7f522b988a4bee49e5
+O
+src/main/ConnectionHandler.java,9/8/98eff0220e6e9778b2de8fc9189271cf89e18cfd
+D
+src/domain/Move.java,7/6/76f9a31d64f93a32e35104d700e60ed1142c2753
+H
+src/game/GameRunner.java,c/9/c93287cefdf562baf43fa7067fe9ec49294ffb87

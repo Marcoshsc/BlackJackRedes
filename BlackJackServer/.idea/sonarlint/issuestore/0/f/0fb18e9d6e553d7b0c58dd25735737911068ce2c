@@ -1,0 +1,8 @@
+
+T
+java:S1128"7Remove this unused import 'domain.NetworkTransferable'.(şÆÕä8†İù¡/
+W
+java:S11416"5Extract this nested try block into a separate method.(¡»¢üùÿÿÿÿ8†İù¡/
+z	java:S135$"YReduce the total number of break and continue statements in this loop to use at most one.(ü§è½ùÿÿÿÿ8†İù¡/
+T
+java:S1128"2Remove this unused import 'java.util.Collections'.(¢³ïÓşÿÿÿÿ8†İù¡/
