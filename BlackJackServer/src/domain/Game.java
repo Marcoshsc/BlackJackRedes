@@ -19,6 +19,23 @@ public class Game {
         player.addCard(card);
     }
 
+    public List<Player> getWinners() {
+        List<Player> winners = new ArrayList<>();
+        boolean blackJack = false;
+        for (Player player : players) {
+            if(player.blackJack()) {
+                winners.add(player);
+                blackJack = true;
+                continue;
+            }
+            int points = player.getValue();
+            if(points == 21 && !blackJack) {
+                winners.add(player);
+            }
+        }
+        return winners;
+    }
+
     public static NetworkTransferable<Game> networkTransferable() {
         NetworkTransferable<Player> playerNetworkTransferable = Player.networkTransferable();
         return new NetworkTransferable<>() {

@@ -1,6 +1,5 @@
 package game;
 
-import communication.CommunicationAnswer;
 import communication.CommunicationHandler;
 import communication.CommunicationTypes;
 import domain.Game;
@@ -11,8 +10,8 @@ import domain.enums.PlayerStatus;
 import server.ConnectionHandler;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 public class GameInstance implements Runnable {
 
@@ -32,16 +31,38 @@ public class GameInstance implements Runnable {
     private void runGame() {
         try {
             do {
-                for (int i = 0; i < game.getPlayers().size(); i++) {
-                    Player currentPlayer = playerQueue.dequeue();
-                    if(currentPlayer.getStatus() != PlayerStatus.PLAYING)
-                        continue;
-                    ConnectionHandler connectionHandler = currentPlayer.getConnectionHandler();
-                    RaiseDecision raiseDecision = (RaiseDecision) CommunicationHandler.of(connectionHandler).getMessage(
-                            Collections.singletonList(CommunicationTypes.RAISE_DECISION),
-                            Collections.singletonList(RaiseDecision.networkTransferable())).getValue();
-                    currentPlayer.raiseBet(raiseDecision.getRaiseValue());
-                }
+                double currentBet = 0d;
+                boolean newBet = false;
+                do {
+                    for (int i = 0; i < game.getPlayers().size(); i++) {
+                        Player currentPlayer = playerQueue.dequeue();
+                        if(currentPlayer.getStatus() != PlayerStatus.PLAYING)
+                            continue;
+                        if(currentPlayer.getBet() == currentBet)
+                            continue;
+                        ConnectionHandler connectionHandler = currentPlayer.getConnectionHandler();
+                        RaiseDecision raiseDecision = (RaiseDecision) CommunicationHandler.of(connectionHandler).getMessage(
+                                Collections.singletonList(CommunicationTypes.RAISE_DECISION),
+                                Collections.singletonList(RaiseDecision.networkTransferable())).getValue();
+                        if(raiseDecision.isResign()) {
+                            currentPlayer.giveUp();
+                        }
+                        else {
+                            currentPlayer.raiseBet(raiseDecision.getRaiseValue());
+                            if(currentBet < currentPlayer.getBet()) {
+                                currentBet = currentPlayer.getBet();
+                                newBet = true;
+                            }
+                        }
+                        for (Player player : game.getPlayers()) {
+                            CommunicationHandler.of(player.getConnectionHandler()).sendMessage(CommunicationTypes.GAME_INFO,
+                                    Game.networkTransferable(), game);
+                        }
+                    }
+                } while(newBet);
+
+                List<Player> winners = game.getWinners();
+                System.out.println(winners.size() + " winners");
 
                 for (int i = 0; i < game.getPlayers().size(); i++) {
                     Player currentPlayer = playerQueue.dequeue();
@@ -63,33 +84,5 @@ public class GameInstance implements Runnable {
         } catch (IOException exc) {
             exc.printStackTrace();
         }
-    }
-
-    private boolean handleMove(Player currentPlayer, ConnectionHandler connectionHandler,
-                            ConnectionHandler notPlayingConnectionHandler, DrawDecision move) throws IOException {
-        game.makeMove(move, currentPlayer.getShape());
-        if(game.isFinished()) {
-            if(connectionHandler != null) {
-                CommunicationHandler.of(connectionHandler).sendMessage(CommunicationTypes.GAME_END,
-                        Game.networkTransferable(), game);
-            }
-            if(notPlayingConnectionHandler != null) {
-                CommunicationHandler.of(notPlayingConnectionHandler).sendMessage(CommunicationTypes.GAME_END,
-                        Game.networkTransferable(), game);
-            }
-            EndGameManager endGameManager = new EndGameManager(p1, p2);
-            Thread thread = new Thread(endGameManager);
-            thread.start();
-            return true;
-        }
-        if(connectionHandler != null) {
-            CommunicationHandler.of(connectionHandler).sendMessage(CommunicationTypes.PLAYER_MOVE,
-                    Game.networkTransferable(), game);
-        }
-        if(notPlayingConnectionHandler != null) {
-            CommunicationHandler.of(notPlayingConnectionHandler).sendMessage(CommunicationTypes.PLAYER_MOVE,
-                    Game.networkTransferable(), game);
-        }
-        return false;
     }
 }

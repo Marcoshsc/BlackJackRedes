@@ -34,7 +34,8 @@ public class PlayAgainState {
     }
 
     private void createNewGame() throws IOException {
-        Game game = new Game(p1, p2);
+//        Game game = new Game(p1, p2);
+        Game game = null;
         if(p1.getConnectionHandler() != null) {
             CommunicationHandler.of(p1.getConnectionHandler()).sendMessage(CommunicationTypes.GAME_FOUND,
                     Game.networkTransferable(), game);

@@ -1,6 +1,5 @@
 package domain;
 
-import server.ConnectionHandler;
 
 public class RaiseDecision {
 
@@ -28,7 +27,7 @@ public class RaiseDecision {
             }
 
             @Override
-            public RaiseDecision fromTransferString(String transferString, ConnectionHandler connectionHandler) {
+            public RaiseDecision fromTransferString(String transferString) {
                 String[] splitted = transferString.split("/");
                 return new RaiseDecision(Double.parseDouble(splitted[0]), Boolean.parseBoolean(splitted[1]));
             }

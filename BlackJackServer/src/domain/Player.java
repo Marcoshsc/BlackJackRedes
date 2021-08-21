@@ -1,6 +1,8 @@
 package domain;
 
+import domain.enums.Faces;
 import domain.enums.PlayerStatus;
+import domain.enums.Suit;
 import server.ConnectionHandler;
 
 import java.util.ArrayList;
@@ -36,6 +38,12 @@ public class Player {
         }
         bet += value;
         balance -= value;
+    }
+
+    public boolean blackJack() {
+        return cards.size() == 2 && (
+                (cards.get(0).getFaces() == Faces.ACE && cards.get(0).getSuit() == Suit.SPADES && cards.get(1).getFaces() == Faces.JACK && cards.get(1).getSuit() == Suit.SPADES) ||
+                (cards.get(1).getFaces() == Faces.ACE && cards.get(1).getSuit() == Suit.SPADES && cards.get(0).getFaces() == Faces.JACK && cards.get(0).getSuit() == Suit.SPADES));
     }
 
     public void addCard(Card card) {

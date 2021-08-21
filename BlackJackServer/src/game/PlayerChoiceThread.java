@@ -27,7 +27,8 @@ public class PlayerChoiceThread implements Runnable {
         Player player = forP1 ? p1 : p2;
         Player opponent = forP1 ? p2 : p1;
         try {
-            if (player.isComputer()) {
+//            if (player.isComputer()) {
+            if(true) {
                 if (forP1)
                     playAgainState.setP1Wants();
                 else
