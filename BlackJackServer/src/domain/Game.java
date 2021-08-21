@@ -1,11 +1,9 @@
 package domain;
 
-import domain.enums.Shape;
+import game.PlayerQueue;
 import server.ConnectionHandler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Game {
 
@@ -14,67 +12,11 @@ public class Game {
 
     public Game(List<Player> players) {
         this.players = players;
-        this.board = new Shape[3][3];
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                board[i][j] = null;
-            }
-        }
     }
 
-    public void makeMove(Move move, Shape shape) {
-        int row = move.getRow();
-        int column = move.getColumn();
-        if(board[row][column] != null)
-            throw new IllegalArgumentException("Invalid move.");
-        board[row][column] = shape;
-    }
-
-    public Move getRandomValidMove() {
-        List<Move> validMoves = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if(board[i][j] == null)
-                    validMoves.add(new Move(i, j));
-            }
-        }
-        int total = validMoves.size();
-        int index = new Random().nextInt(total);
-        return validMoves.get(index);
-    }
-
-    public boolean isFinished() {
-        if(draw())
-            return true;
-        return areShapesEqual(board[0][0], board[0][1], board[0][2]) ||
-                areShapesEqual(board[1][0], board[1][1], board[1][2]) ||
-                areShapesEqual(board[2][0], board[2][1], board[2][2]) ||
-                areShapesEqual(board[0][0], board[1][0], board[2][0]) ||
-                areShapesEqual(board[0][1], board[1][1], board[2][1]) ||
-                areShapesEqual(board[0][2], board[1][2], board[2][2]) ||
-                areShapesEqual(board[0][0], board[1][1], board[2][2]) ||
-                areShapesEqual(board[0][2], board[1][1], board[2][0]);
-    }
-
-    private boolean areShapesEqual(Shape... shapes) {
-        Shape first = shapes[0];
-        if(first == null)
-            return false;
-        for (int i = 1; i < shapes.length; i++) {
-            if(shapes[i] != first)
-                return false;
-        }
-        return true;
-    }
-
-    private boolean draw() {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if(board[i][j] == null)
-                    return false;
-            }
-        }
-        return true;
+    public void drawCard(Player player) {
+        Card card = deck.getCard();
+        player.addCard(card);
     }
 
     public static NetworkTransferable<Game> networkTransferable() {
@@ -82,8 +24,10 @@ public class Game {
         return new NetworkTransferable<>() {
             @Override
             public String toTransferString(Game value) {
-                return String.format("%s@%s@%s", playerNetworkTransferable.toTransferString(value.player1),
-                        playerNetworkTransferable.toTransferString(value.player2), value.getBoardString());
+                return String.format("%s@%s@%s@%s", playerNetworkTransferable.toTransferString(value.players.get(0)),
+                        playerNetworkTransferable.toTransferString(value.players.get(1)),
+                        playerNetworkTransferable.toTransferString(value.players.get(2)),
+                        playerNetworkTransferable.toTransferString(value.players.get(3)));
             }
 
             @Override
@@ -93,16 +37,11 @@ public class Game {
         };
     }
 
-    private String getBoardString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                stringBuilder.append(board[i][j] != null ? board[i][j].toString() : "null");
-                if(i != 2 || j != 2)
-                    stringBuilder.append("|");
-            }
-        }
-        return stringBuilder.toString();
+    public Deck getDeck() {
+        return deck;
     }
 
+    public List<Player> getPlayers() {
+        return players;
+    }
 }
