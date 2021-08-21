@@ -5,7 +5,6 @@ import communication.CommunicationTypes;
 import domain.Game;
 import domain.LobbyUser;
 import domain.Player;
-import domain.enums.Shape;
 import lobby.LobbyManager;
 import server.ConnectionHandler;
 
