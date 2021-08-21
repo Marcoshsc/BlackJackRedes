@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class TicTacToeTCPServer implements Runnable {
+public class BlackJackTCPServer implements Runnable {
 
     private static final int PORT = 3002;
     private final LobbyManager lobbyManager = new LobbyManager();

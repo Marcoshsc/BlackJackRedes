@@ -11,7 +11,6 @@ public class LobbyManager {
 
     public synchronized void addToLobby(LobbyUser lobbyUser) {
         lobbyUsers.add(lobbyUser);
-        System.out.println("Added to lobby");
         notifyAll();
     }
 

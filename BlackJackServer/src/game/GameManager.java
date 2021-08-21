@@ -10,8 +10,9 @@ import lobby.LobbyManager;
 import server.ConnectionHandler;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class GameManager implements Runnable {
 
@@ -39,14 +40,12 @@ public class GameManager implements Runnable {
                     Collections.singletonList(CommunicationTypes.INFORMATION),
                     Collections.singletonList(LobbyUser.networkTransferable())
             ).getValue();
-            if(lobbyUser.isComputer()) {
-                runGameAgainstComputer();
-                return;
-            }
-            LobbyUser opponent = findOpponent();
-            if(opponent != null) {
-                lobbyManager.removeFromLobby(opponent);
-                runGameBetweenPlayers(opponent);
+            List<LobbyUser> opponents = findOpponents();
+            if(opponents.size() == 3) {
+                for (LobbyUser lobbyUser : opponents) {
+                    lobbyManager.removeFromLobby(lobbyUser);
+                }
+                runGameBetweenPlayers(opponents);
                 return;
             }
             lobbyManager.addToLobby(lobbyUser);
@@ -56,34 +55,10 @@ public class GameManager implements Runnable {
         }
     }
 
-    private void runGameAgainstComputer() {
-        try {
-            Player computer = new Player(
-                    lobbyUser.getShape() == Shape.CIRCLE ? Shape.X : Shape.CIRCLE,
-                    null,
-                    "Computer",
-                    true
-            );
-            Player lobbyUserPlayer = new Player(
-                    lobbyUser.getShape(),
-                    connectionHandler,
-                    lobbyUser.getUsername(),
-                    false);
-            communicateUsersAndStartGame(lobbyUserPlayer, computer);
-        } catch (IOException exception) {
-            exception.printStackTrace();
-        }
-    }
-
-    private void communicateUsersAndStartGame(Player player1, Player player2) throws IOException {
-        Game game = new Game(player1, player2);
-        CommunicationHandler.of(connectionHandler).sendMessage(
-                CommunicationTypes.GAME_FOUND,
-                Game.networkTransferable(),
-                game
-        );
-        if(!player2.isComputer()) {
-            CommunicationHandler.of(player2.getConnectionHandler()).sendMessage(
+    private void communicateUsersAndStartGame(List<Player> players) throws IOException {
+        Game game = new Game(players);
+        for (Player player : players) {
+            CommunicationHandler.of(player.getConnectionHandler()).sendMessage(
                     CommunicationTypes.GAME_FOUND,
                     Game.networkTransferable(),
                     game
@@ -94,32 +69,30 @@ public class GameManager implements Runnable {
         thread.start();
     }
 
-    private void runGameBetweenPlayers(LobbyUser opponent) {
+    private void runGameBetweenPlayers(List<LobbyUser> opponents) {
         try {
-            Player opponentPlayer = new Player(
-                    lobbyUser.getShape() == Shape.CIRCLE ? Shape.X : Shape.CIRCLE,
-                    opponent.getConnectionHandler(),
-                    opponent.getUsername(),
-                    false
-            );
-            Player lobbyUserPlayer = new Player(
-                    lobbyUser.getShape(),
-                    connectionHandler,
-                    lobbyUser.getUsername(),
-                    false);
-            communicateUsersAndStartGame(lobbyUserPlayer, opponentPlayer);
+            List<Player> players = new ArrayList<>();
+            Player mainPlayer = new Player(lobbyUser.getConnectionHandler(), lobbyUser.getUsername());
+            players.add(mainPlayer);
+            for (LobbyUser lobbyUser : opponents) {
+                Player player = new Player(lobbyUser.getConnectionHandler(), lobbyUser.getUsername());
+                players.add(player);
+            }
+            communicateUsersAndStartGame(players);
         } catch (IOException exception) {
             exception.printStackTrace();
         }
     }
 
-    private LobbyUser findOpponent() {
-        for (LobbyUser user : lobbyManager.getLobbyUsers()) {
-            if(!user.getShape().equals(lobbyUser.getShape())) {
-                return user;
+    private List<LobbyUser> findOpponents() {
+        List<LobbyUser> lobbyUsers = new ArrayList<>();
+        for (LobbyUser lobbyUser : lobbyManager.getLobbyUsers()) {
+            lobbyUsers.add(lobbyUser);
+            if(lobbyUsers.size() == 3) {
+                return lobbyUsers;
             }
         }
-        return null;
+        return lobbyUsers;
     }
 
 }

@@ -1,46 +1,74 @@
 package domain;
 
-import domain.enums.Shape;
 import server.ConnectionHandler;
 
-import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Player {
 
-    private final Shape shape;
     private final ConnectionHandler connectionHandler;
     private final String username;
-    private final boolean computer;
+    private double balance = 1000d;
+    private double bet = 0d;
+    private List<Card> cards = new ArrayList<>();
 
-    public Player(Shape shape, ConnectionHandler connectionHandler, String username, boolean computer) {
-        this.shape = shape;
+    public Player(ConnectionHandler connectionHandler, String username) {
         this.connectionHandler = connectionHandler;
         this.username = username;
-        this.computer = computer;
+    }
+
+    public Player(ConnectionHandler connectionHandler, String username, double balance, List<Card> cards, double bet) {
+        this.connectionHandler = connectionHandler;
+        this.username = username;
+        this.balance = balance;
+        this.cards = cards;
+        this.bet = bet;
     }
 
     public static NetworkTransferable<Player> networkTransferable() {
         return new NetworkTransferable<>() {
             @Override
             public String toTransferString(Player value) {
-                return String.format("%s/%s/%s", value.shape, value.username, value.computer);
+                StringBuilder stringBuilder = new StringBuilder();
+                for (int i = 0; i < value.cards.size(); i++) {
+                    stringBuilder.append(String.format("%s*%s", value.cards.get(i).getFaces(), value.cards.get(i).getSuit()));
+                    if(i != value.getCards().size() - 1) {
+                        stringBuilder.append("-");
+                    }
+                }
+                return String.format("%s/%f/%s/%f", value.username, value.balance, stringBuilder.toString(), value.bet);
             }
 
             @Override
             public Player fromTransferString(String transferString, ConnectionHandler connectionHandler) {
                 String[] values = transferString.split("/");
+                List<Card> newCards = new ArrayList<>();
+                String[] splittedCards = values[2].split("-");
+                for (String splittedCard : splittedCards) {
+                    newCards.add(new Card(splittedCard));
+                }
                 return new Player(
-                        Shape.valueOf(values[0]),
                         connectionHandler,
-                        values[1],
-                        Boolean.parseBoolean(values[2])
+                        values[0],
+                        Double.parseDouble(values[1]),
+                        newCards,
+                        Double.parseDouble(values[3])
                 );
             }
         };
     }
 
-    public Shape getShape() {
-        return shape;
+    public double getBet() {
+        return bet;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public List<Card> getCards() {
+        return cards;
     }
 
     public ConnectionHandler getConnectionHandler() {
@@ -51,7 +79,4 @@ public class Player {
         return username;
     }
 
-    public boolean isComputer() {
-        return computer;
-    }
 }

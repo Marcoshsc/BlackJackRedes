@@ -1,11 +1,11 @@
 package main;
 
-import server.TicTacToeTCPServer;
+import server.BlackJackTCPServer;
 
 public class Main {
 
     public static void main(String[] args) {
-        Thread thread = new Thread(new TicTacToeTCPServer());
+        Thread thread = new Thread(new BlackJackTCPServer());
         thread.start();
     }
 
