@@ -8,14 +8,20 @@ public class Game {
 
     private final Deck deck = new Deck();
     private final List<Player> players;
+    private final String turn;
 
-    public Game(List<Player> players) {
+    public Game(List<Player> players, String turn) {
         this.players = players;
+        this.turn = turn;
     }
 
     public void drawCard(Player player) {
         Card card = deck.getCard();
         player.addCard(card);
+    }
+
+    public String getTurn() {
+        return turn;
     }
 
     public List<Player> getWinners() {
@@ -40,20 +46,22 @@ public class Game {
         return new NetworkTransferable<>() {
             @Override
             public String toTransferString(Game value) {
-                return String.format("%s@%s@%s@%s", playerNetworkTransferable.toTransferString(value.players.get(0)),
+                return String.format("%s@%s@%s@%s@%s", playerNetworkTransferable.toTransferString(value.players.get(0)),
                         playerNetworkTransferable.toTransferString(value.players.get(1)),
                         playerNetworkTransferable.toTransferString(value.players.get(2)),
-                        playerNetworkTransferable.toTransferString(value.players.get(3)));
+                        playerNetworkTransferable.toTransferString(value.players.get(3)),
+                        value.turn);
             }
 
             @Override
             public Game fromTransferString(String transferString) {
                 String[] splitted = transferString.split("@");
                 List<Player> players = new ArrayList<>();
-                for (String string : splitted) {
+                for (int i = 0; i < splitted.length - 1; i++) {
+                    String string = splitted[i];
                     players.add(Player.networkTransferable().fromTransferString(string));
                 }
-                return new Game(players);
+                return new Game(players, splitted[splitted.length - 1]);
             }
         };
     }

@@ -54,8 +54,8 @@ public class PlayAgainManager implements Runnable {
             }
             else {
                 Game game = (Game) answerServer.getValue();
-                GameRunner gameRunner = new GameRunner(game, connectionHandler, player, prevScore);
-                new Thread(gameRunner).start();
+//                GameRunner gameRunner = new GameRunner(game, connectionHandler, player, prevScore);
+//                new Thread(gameRunner).start();
             }
         } catch(IOException exc) {
             exc.printStackTrace();

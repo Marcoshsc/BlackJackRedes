@@ -21,6 +21,10 @@ public class GameInstance implements Runnable {
     public GameInstance(Game game) {
         this.game = game;
         this.playerQueue = new PlayerQueue(game.getPlayers());
+        for (Player player : game.getPlayers()) {
+            game.drawCard(player);
+            game.drawCard(player);
+        }
     }
 
     @Override
@@ -34,16 +38,20 @@ public class GameInstance implements Runnable {
                 double currentBet = 0d;
                 boolean newBet = false;
                 do {
+                    newBet = false;
                     for (int i = 0; i < game.getPlayers().size(); i++) {
                         Player currentPlayer = playerQueue.dequeue();
+                        game.setTurn(currentPlayer.getUsername());
+                        System.out.println(i);
+                        updatePlayerGames();
                         if(currentPlayer.getStatus() != PlayerStatus.PLAYING)
-                            continue;
-                        if(currentPlayer.getBet() == currentBet)
                             continue;
                         ConnectionHandler connectionHandler = currentPlayer.getConnectionHandler();
                         RaiseDecision raiseDecision = (RaiseDecision) CommunicationHandler.of(connectionHandler).getMessage(
                                 Collections.singletonList(CommunicationTypes.RAISE_DECISION),
                                 Collections.singletonList(RaiseDecision.networkTransferable())).getValue();
+                        System.out.println(raiseDecision.getRaiseValue());
+                        System.out.println(raiseDecision.isResign());
                         if(raiseDecision.isResign()) {
                             currentPlayer.giveUp();
                         }
@@ -54,10 +62,21 @@ public class GameInstance implements Runnable {
                                 newBet = true;
                             }
                         }
-                        for (Player player : game.getPlayers()) {
-                            CommunicationHandler.of(player.getConnectionHandler()).sendMessage(CommunicationTypes.GAME_INFO,
-                                    Game.networkTransferable(), game);
+                    }
+                    boolean equal = true;
+                    for (int i = 1; i < game.getPlayers().size(); i++) {
+                        if(game.getPlayers().get(i).getBet() != game.getPlayers().get(0).getBet()) {
+                            equal = false;
                         }
+                    }
+                    if(!equal) {
+                        double greater = game.getPlayers().get(0).getBet();
+                        for (Player player : game.getPlayers()) {
+                            if(greater < player.getBet())
+                                greater = player.getBet();
+                        }
+                        newBet = true;
+                        currentBet = greater;
                     }
                 } while(newBet);
 
@@ -83,6 +102,13 @@ public class GameInstance implements Runnable {
             } while (true);
         } catch (IOException exc) {
             exc.printStackTrace();
+        }
+    }
+
+    private void updatePlayerGames() throws IOException {
+        for (Player player : game.getPlayers()) {
+            CommunicationHandler.of(player.getConnectionHandler()).sendMessage(CommunicationTypes.GAME_INFO,
+                    Game.networkTransferable(), game);
         }
     }
 }

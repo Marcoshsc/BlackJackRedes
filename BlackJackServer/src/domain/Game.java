@@ -9,6 +9,7 @@ public class Game {
 
     private final Deck deck = new Deck();
     private final List<Player> players;
+    private String turn = null;
 
     public Game(List<Player> players) {
         this.players = players;
@@ -41,10 +42,11 @@ public class Game {
         return new NetworkTransferable<>() {
             @Override
             public String toTransferString(Game value) {
-                return String.format("%s@%s@%s@%s", playerNetworkTransferable.toTransferString(value.players.get(0)),
+                return String.format("%s@%s@%s@%s@%s", playerNetworkTransferable.toTransferString(value.players.get(0)),
                         playerNetworkTransferable.toTransferString(value.players.get(1)),
                         playerNetworkTransferable.toTransferString(value.players.get(2)),
-                        playerNetworkTransferable.toTransferString(value.players.get(3)));
+                        playerNetworkTransferable.toTransferString(value.players.get(3)),
+                        value.getTurn());
             }
 
             @Override
@@ -52,6 +54,16 @@ public class Game {
                 throw new IllegalArgumentException("Server cannot read games.");
             }
         };
+    }
+
+
+
+    public String getTurn() {
+        return turn;
+    }
+
+    public void setTurn(String turn) {
+        this.turn = turn;
     }
 
     public Deck getDeck() {

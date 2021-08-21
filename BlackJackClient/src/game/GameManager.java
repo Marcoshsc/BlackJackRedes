@@ -52,7 +52,7 @@ public class GameManager {
     private void startGame(CommunicationAnswer answer, Player player) {
         System.out.println("Partida Encontrada!");
         Game game = (Game) answer.getValue();
-        GameRunner gameRunner = new GameRunner(game, connectionHandler, player);
+        GameRunner gameRunner = new GameRunner(game, connectionHandler, game.getPlayers(), player.getUsername());
         Thread thread = new Thread(gameRunner);
         thread.start();
     }
