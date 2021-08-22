@@ -48,6 +48,9 @@ public class GameRunner implements Runnable {
         assert player != null;
         try {
             betPhase(player);
+            System.out.println("Fase de apostas concluida! Puxando novas cartas...");
+            game = (Game) CommunicationHandler.of(connectionHandler).getMessage(Collections.singletonList(CommunicationTypes.GAME_INFO),
+                    Collections.singletonList(Game.networkTransferable())).getValue();
             return;
         } catch (IOException exception) {
             exception.printStackTrace();
@@ -68,9 +71,25 @@ public class GameRunner implements Runnable {
             else {
                 System.out.println("Aguardando " + game.getTurn() + " Betar...");
             }
+            if(areBetsEqual()) {
+                break;
+            }
             game = (Game) CommunicationHandler.of(connectionHandler).getMessage(Collections.singletonList(CommunicationTypes.GAME_INFO),
                     Collections.singletonList(Game.networkTransferable())).getValue();
         }
+    }
+
+    private boolean areBetsEqual() {
+        if(game.getCurrentBet() == 0d) {
+            return false;
+        }
+        boolean equal = true;
+        for (int i = 1; i < game.getPlayers().size(); i++) {
+            if(game.getPlayers().get(i).getBet() != game.getPlayers().get(0).getBet()) {
+                equal = false;
+            }
+        }
+        return equal;
     }
 
     private void printGameState() {
