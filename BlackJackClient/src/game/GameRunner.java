@@ -49,6 +49,7 @@ public class GameRunner implements Runnable {
             while(true) {
                 System.out.println("Suas cartas: ");
                 assert player != null;
+                System.out.println(player.getCards().size() + " Cards.");
                 for (Card card : player.getCards()) {
                     System.out.printf("%s of %s\n", card.getFaces(), card.getSuit());
                 }

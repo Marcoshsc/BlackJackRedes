@@ -39,19 +39,20 @@ public class GameInstance implements Runnable {
                 boolean newBet = false;
                 do {
                     newBet = false;
+                    System.out.printf("Current bet: %f\n", currentBet);
                     for (int i = 0; i < game.getPlayers().size(); i++) {
                         Player currentPlayer = playerQueue.dequeue();
                         game.setTurn(currentPlayer.getUsername());
-                        System.out.println(i);
-                        updatePlayerGames();
+                        System.out.printf("%s - %f\n", currentPlayer.getUsername(), currentPlayer.getBet());
                         if(currentPlayer.getStatus() != PlayerStatus.PLAYING)
                             continue;
+                        if(currentPlayer.getBet() == currentBet && currentBet != 0d)
+                            continue;
+                        updatePlayerGames();
                         ConnectionHandler connectionHandler = currentPlayer.getConnectionHandler();
                         RaiseDecision raiseDecision = (RaiseDecision) CommunicationHandler.of(connectionHandler).getMessage(
                                 Collections.singletonList(CommunicationTypes.RAISE_DECISION),
                                 Collections.singletonList(RaiseDecision.networkTransferable())).getValue();
-                        System.out.println(raiseDecision.getRaiseValue());
-                        System.out.println(raiseDecision.isResign());
                         if(raiseDecision.isResign()) {
                             currentPlayer.giveUp();
                         }

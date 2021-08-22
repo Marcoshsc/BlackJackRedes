@@ -96,7 +96,6 @@ public class Player {
             public Player fromTransferString(String transferString) {
                 String[] values = transferString.split("/");
                 List<Card> newCards = new ArrayList<>();
-                System.out.println("Values 2: " + values[2]);
                 if(!values[2].equals("")) {
                     String[] splittedCards = values[2].split("-");
                     for (String splittedCard : splittedCards) {
