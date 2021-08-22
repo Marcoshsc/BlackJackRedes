@@ -36,6 +36,11 @@ public class CommunicationHandler {
         connectionHandler.getDataOutputStream().writeUTF(message);
     }
 
+    public <T> void sendMessage(CommunicationTypes type, NetworkTransferable<T> handler, String context, T value) throws IOException {
+        String message = String.format("%s#%s", type.toString(), handler.toTransferString(value, context));
+        connectionHandler.getDataOutputStream().writeUTF(message);
+    }
+
     public void sendMessage(CommunicationTypes type) throws IOException {
         String message = String.format("%s#", type.toString());
         connectionHandler.getDataOutputStream().writeUTF(message);

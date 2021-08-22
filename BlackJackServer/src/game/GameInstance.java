@@ -104,7 +104,6 @@ public class GameInstance implements Runnable {
             currentPlayer = playerQueue.dequeue();
             game.setTurn(currentPlayer.getUsername());
         }
-//        updatePlayerGames();
         do {
             newBet = false;
             System.out.printf("Current bet: %f\n", currentBet);
@@ -136,7 +135,6 @@ public class GameInstance implements Runnable {
                 if(i != game.getValidPlayers() - 1) {
                     currentPlayer = playerQueue.dequeue();
                     game.setTurn(currentPlayer.getUsername());
-//                    updatePlayerGames();
                 }
             }
             boolean equal = areBetsEqual(currentBet);
@@ -156,13 +154,6 @@ public class GameInstance implements Runnable {
         for (Player player : game.getPlayers()) {
             player.setBetted(false);
         }
-//        game.setStage("draw");
-//        if (!game.shouldCalculateWinners()) {
-//            for (Player player : game.getPlayers()) {
-//                player.setBetted(false);
-//            }
-//        }
-//        updatePlayerGames();
     }
 
     private boolean areBetsEqual(double currentBet) {
@@ -181,7 +172,7 @@ public class GameInstance implements Runnable {
     private void updatePlayerGames() throws IOException {
         for (Player player : game.getPlayers()) {
             CommunicationHandler.of(player.getConnectionHandler()).sendMessage(CommunicationTypes.GAME_INFO,
-                    Game.networkTransferable(), game);
+                    Game.networkTransferable(), player.getUsername(), game);
         }
     }
 }

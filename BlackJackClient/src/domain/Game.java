@@ -69,6 +69,7 @@ public class Game {
 
             @Override
             public Game fromTransferString(String transferString) {
+                System.out.println(transferString);
                 String[] splitted = transferString.split("@");
                 List<Player> players = new ArrayList<>();
                 for (int i = 0; i < 4; i++) {

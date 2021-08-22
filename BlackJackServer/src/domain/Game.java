@@ -146,6 +146,17 @@ public class Game {
             }
 
             @Override
+            public String toTransferString(Game value, String context) {
+                String gameString = String.format("%s@%s@%s@%s@%s@%s@%f", playerNetworkTransferable.toTransferString(value.players.get(0), context),
+                        playerNetworkTransferable.toTransferString(value.players.get(1), context),
+                        playerNetworkTransferable.toTransferString(value.players.get(2), context),
+                        playerNetworkTransferable.toTransferString(value.players.get(3), context),
+                        value.getTurn(), value.getStage(), value.currentBet);
+                System.out.println(gameString);
+                return gameString;
+            }
+
+            @Override
             public Game fromTransferString(String transferString, ConnectionHandler connectionHandler) {
                 throw new IllegalArgumentException("Server cannot read games.");
             }

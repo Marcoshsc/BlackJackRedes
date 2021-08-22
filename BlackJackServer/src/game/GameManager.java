@@ -60,6 +60,7 @@ public class GameManager implements Runnable {
             CommunicationHandler.of(player.getConnectionHandler()).sendMessage(
                     CommunicationTypes.GAME_FOUND,
                     Game.networkTransferable(),
+                    player.getUsername(),
                     game
             );
         }

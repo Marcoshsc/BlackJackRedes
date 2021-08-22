@@ -123,6 +123,20 @@ public class Player {
             }
 
             @Override
+            public String toTransferString(Player value, String context) {
+                StringBuilder stringBuilder = new StringBuilder();
+                int sizeToUse = !context.equals(value.getUsername()) ? 1 : value.cards.size();
+                for (int i = 0; i < sizeToUse; i++) {
+                    stringBuilder.append(String.format("%s*%s", value.cards.get(i).getFaces(), value.cards.get(i).getSuit()));
+                    if(i != sizeToUse - 1) {
+                        stringBuilder.append("-");
+                    }
+                }
+                return String.format("%s/%f/%s/%f/%s/%s/%s", value.username, value.balance, stringBuilder.toString(), value.bet,
+                        value.status, value.lastDecision, value.betted);
+            }
+
+            @Override
             public Player fromTransferString(String transferString, ConnectionHandler connectionHandler) {
                 String[] values = transferString.split("/");
                 List<Card> newCards = new ArrayList<>();
