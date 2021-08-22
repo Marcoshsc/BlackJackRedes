@@ -11,7 +11,7 @@ public class Game {
     private final List<Player> players;
     private String turn = null;
     private String stage;
-    private double currentBet;
+    private double currentBet = 0d;
 
     public Game(List<Player> players) {
         this.players = players;
@@ -24,6 +24,23 @@ public class Game {
     public void drawCard(Player player) {
         Card card = deck.getCard();
         player.addCard(card);
+    }
+
+    public int getValidPlayers() {
+        int number = 0;
+        for (int i = 0; i < players.size(); i++) {
+            if(players.get(i).getStatus() == PlayerStatus.PLAYING)
+                number++;
+        }
+        return number;
+    }
+
+    public boolean everyoneBetted() {
+        for (Player player : players) {
+            if(!player.isBetted())
+                return false;
+        }
+        return true;
     }
 
     public String getStage() {

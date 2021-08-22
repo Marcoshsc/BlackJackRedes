@@ -94,11 +94,14 @@ public class Game {
     }
 
     public boolean everyoneBetted() {
+        boolean betted = true;
         for (Player player : players) {
-            if(!player.isBetted())
-                return false;
+            System.out.printf("Player: %s - Betted: %s\n", player.getUsername(), player.isBetted());
+            if(!player.isBetted()) {
+                betted = false;
+            }
         }
-        return true;
+        return betted;
     }
 
     public List<Player> getPlayers() {

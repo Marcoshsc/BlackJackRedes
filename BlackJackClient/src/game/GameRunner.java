@@ -46,7 +46,10 @@ public class GameRunner implements Runnable {
     private void runGame() {
         try {
             while(true) {
-                betPhase();
+                boolean end = betPhase();
+                if(end) {
+                    break;
+                }
                 System.out.println("Fase de apostas concluida! Verificando vencedor...");
                 CommunicationAnswer answer = CommunicationHandler.of(connectionHandler).getMessage(
                         Arrays.asList(CommunicationTypes.GAME_INFO, CommunicationTypes.GAME_END),
@@ -67,7 +70,7 @@ public class GameRunner implements Runnable {
     }
 
     private void drawPhase() throws IOException {
-        for(int i = 0; i < game.getPlayers().size(); i++) {
+        for(int i = 0; i < game.getValidPlayers(); i++) {
             printGameState();
             Player player = getThisPlayer();
             assert player != null;
@@ -82,38 +85,43 @@ public class GameRunner implements Runnable {
         }
     }
 
-    private void betPhase() throws IOException {
-        int stage = 0;
-        while(true) {
+    private boolean betPhase() throws IOException {
+        while (true) {
             Player player = getThisPlayer();
             assert player != null;
             printGameState();
-            if(game.getTurn().equals(username) && player.getStatus() == PlayerStatus.PLAYING &&
+            if (game.getTurn().equals(username) && player.getStatus() == PlayerStatus.PLAYING &&
                     (player.getBet() < game.getCurrentBet() || !game.everyoneBetted())) {
-                System.out.printf("We are on stage %d\n", stage);
                 System.out.printf("Fase de apostas! O maior valor apostado foi %f, sua aposta foi %f e você precisa igualar se quiser continuar jogando.\n",
                         game.getCurrentBet(), player.getBet());
                 System.out.println("Vai betar quanto?");
                 double bet = scanner.nextDouble();
                 CommunicationHandler.of(connectionHandler).sendMessage(CommunicationTypes.RAISE_DECISION,
                         RaiseDecision.networkTransferable(), new RaiseDecision(bet, false));
-                stage++;
-            }
-            else {
+            } else {
                 System.out.println("Aguardando " + game.getTurn() + " Betar...");
             }
-            if(game.everyoneBetted() && areBetsEqual()) {
+            if (game.everyoneBetted() && areBetsEqual()) {
                 break;
             }
             game = (Game) CommunicationHandler.of(connectionHandler).getMessage(Collections.singletonList(CommunicationTypes.GAME_INFO),
                     Collections.singletonList(Game.networkTransferable())).getValue();
         }
-        game = (Game) CommunicationHandler.of(connectionHandler).getMessage(Collections.singletonList(CommunicationTypes.GAME_INFO),
-                Collections.singletonList(Game.networkTransferable())).getValue();
+        CommunicationAnswer answer = CommunicationHandler.of(connectionHandler).getMessage(
+                Arrays.asList(CommunicationTypes.GAME_INFO, CommunicationTypes.GAME_END),
+                Arrays.asList(Game.networkTransferable(), GameEndInfo.gameEndInfoNetworkTransferable()));
+        if (answer.getType() == CommunicationTypes.GAME_END) {
+            GameEndInfo endInfo = (GameEndInfo) answer.getValue();
+            System.out.printf("Game ended! %s are the winners with %d points.\n",
+                    String.join(",", endInfo.getWinners()), endInfo.getPoints());
+            return true;
+        }
+        return false;
     }
 
-    private boolean areBetsEqual() {
-        if(game.getCurrentBet() == 0d) {
+
+        private boolean areBetsEqual() {
+            if(game.getCurrentBet() == 0d) {
             return false;
         }
         boolean equal = true;
