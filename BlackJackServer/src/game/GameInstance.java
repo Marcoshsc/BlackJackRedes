@@ -2,14 +2,12 @@ package game;
 
 import communication.CommunicationHandler;
 import communication.CommunicationTypes;
-import domain.Game;
-import domain.DrawDecision;
-import domain.Player;
-import domain.RaiseDecision;
+import domain.*;
 import domain.enums.PlayerStatus;
 import server.ConnectionHandler;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,19 +28,28 @@ public class GameInstance implements Runnable {
 
     private void runGame() {
         try {
+            int i = 0;
             do {
                 makeBetPhase();
 
-                List<Player> winners = game.getWinners();
-                System.out.println(winners.size() + " winners");
-
-                for (Player player : game.getPlayers()) {
-                    if(player.getStatus() == PlayerStatus.PLAYING) {
-                        game.drawCard(player);
+                if(i == 0) {
+                    List<Player> winners = game.getWinners();
+                    if(!winners.isEmpty() && winners.get(0).getValue() == 21) {
+                        game.gameWon(winners);
+                        communicateGameEnd(winners);
+                        break;
                     }
                 }
+                if(game.shouldCalculateWinners()) {
+                    List<Player> winners = game.getWinners();
+                    System.out.println("O jogo acabou!");
+                    game.gameWon(winners);
+                    communicateGameEnd(winners);
+                    break;
+                }
+                i++;
 
-                updatePlayerGames();
+                makeDrawPhase();
 
 //                for (int i = 0; i < game.getPlayers().size(); i++) {
 //                    Player currentPlayer = playerQueue.dequeue();
@@ -63,6 +70,43 @@ public class GameInstance implements Runnable {
             } while (true);
         } catch (IOException exc) {
             exc.printStackTrace();
+        }
+    }
+
+    private void communicateGameEnd(List<Player> winners) throws IOException {
+        List<String> winnerUsernames = new ArrayList<>();
+        for (Player player : winners) {
+            winnerUsernames.add(player.getUsername());
+        }
+        for (Player player : game.getPlayers()) {
+            CommunicationHandler.of(player.getConnectionHandler()).sendMessage(CommunicationTypes.GAME_END,
+                    GameEndInfo.gameEndInfoNetworkTransferable(), new GameEndInfo(winnerUsernames,
+                            winners.isEmpty() ? -1 : winners.get(0).getValue()));
+        }
+    }
+
+    private void makeDrawPhase() throws IOException {
+        game.setStage("draw");
+        Player currentPlayer = playerQueue.dequeue();
+        game.setTurn(currentPlayer.getUsername());
+        updatePlayerGames();
+        for (int i = 0; i < game.getPlayers().size(); i++) {
+            System.out.println(i);
+            DrawDecision drawDecision = (DrawDecision) CommunicationHandler.of(currentPlayer.getConnectionHandler()).getMessage(
+                    Collections.singletonList(CommunicationTypes.DRAW_DECISION),
+                    Collections.singletonList(DrawDecision.networkTransferable())
+            ).getValue();
+            if(!drawDecision.isGiveup()) {
+                game.drawCard(currentPlayer);
+                currentPlayer.setLastDecision("draw");
+            }
+            else {
+                currentPlayer.setLastDecision("keep");
+            }
+            currentPlayer = playerQueue.dequeue();
+            game.setTurn(currentPlayer.getUsername());
+            updatePlayerGames();
+            System.out.println("updated");
         }
     }
 

@@ -16,6 +16,7 @@ public class Player {
     private double balance = 1000d;
     private double bet = 0d;
     private PlayerStatus status = PlayerStatus.PLAYING;
+    private String lastDecision;
     private List<Card> cards = new ArrayList<>();
 
     public Player(String username) {
@@ -23,12 +24,17 @@ public class Player {
     }
 
     public Player(String username, double balance, List<Card> cards, double bet,
-                  PlayerStatus status) {
+                  PlayerStatus status, String lastDecision) {
         this.username = username;
         this.balance = balance;
         this.cards = cards;
         this.bet = bet;
         this.status = status;
+        this.lastDecision = lastDecision;
+    }
+
+    public String getLastDecision() {
+        return lastDecision;
     }
 
     public void raiseBet(double value) {
@@ -108,7 +114,8 @@ public class Player {
                         Double.parseDouble(values[1]),
                         newCards,
                         Double.parseDouble(values[3]),
-                        PlayerStatus.valueOf(values[4])
+                        PlayerStatus.valueOf(values[4]),
+                        values[5]
                 );
             }
         };

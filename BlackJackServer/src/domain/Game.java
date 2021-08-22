@@ -1,6 +1,6 @@
 package domain;
 
-import game.PlayerQueue;
+import domain.enums.PlayerStatus;
 import server.ConnectionHandler;
 
 import java.util.*;
@@ -42,6 +42,44 @@ public class Game {
         this.currentBet = currentBet;
     }
 
+    public boolean shouldCalculateWinners() {
+        boolean should = true;
+        for (Player player : players) {
+            if(player.getStatus() != PlayerStatus.PLAYING)
+                continue;
+            if (player.getLastDecision() == null || player.getLastDecision().equals("draw")) {
+                should = false;
+                break;
+            }
+        }
+        return should;
+    }
+
+    public void gameWon(List<Player> winners) {
+        List<Player> losers = new ArrayList<>();
+        for (Player player : players) {
+            if(winners.contains(player))
+                continue;
+            losers.add(player);
+        }
+        double totalMoney = 0d;
+        for (Player player : losers) {
+            totalMoney += player.getBet();
+        }
+
+        if(!winners.isEmpty()) {
+            double forEach = totalMoney / winners.size();
+            for (Player player : winners) {
+                player.increaseBalance(forEach);
+            }
+        }
+
+        // somente ao final
+        for (Player player : players) {
+            player.reset();
+        }
+    }
+
     public List<Player> getWinners() {
         List<Player> winners = new ArrayList<>();
         boolean blackJack = false;
@@ -54,6 +92,20 @@ public class Game {
             int points = player.getValue();
             if(points == 21 && !blackJack) {
                 winners.add(player);
+            }
+        }
+        if(winners.isEmpty()) {
+            int greater = -1;
+            for(Player player : players) {
+                int score = player.getValue();
+                if(greater < score && score < 21) {
+                    greater = score;
+                }
+            }
+            for (Player player : players) {
+                if(player.getValue() == greater) {
+                    winners.add(player);
+                }
             }
         }
         return winners;

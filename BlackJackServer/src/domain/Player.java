@@ -15,6 +15,7 @@ public class Player {
     private double balance = 1000d;
     private double bet = 0d;
     private PlayerStatus status = PlayerStatus.PLAYING;
+    private String lastDecision;
     private List<Card> cards = new ArrayList<>();
 
     public Player(ConnectionHandler connectionHandler, String username) {
@@ -23,13 +24,14 @@ public class Player {
     }
 
     public Player(ConnectionHandler connectionHandler, String username, double balance, List<Card> cards, double bet,
-                  PlayerStatus status) {
+                  PlayerStatus status, String lastDecision) {
         this.connectionHandler = connectionHandler;
         this.username = username;
         this.balance = balance;
         this.cards = cards;
         this.bet = bet;
         this.status = status;
+        this.lastDecision = lastDecision;
     }
 
     public void raiseBet(double value) {
@@ -38,6 +40,14 @@ public class Player {
         }
         bet += value;
         balance -= value;
+    }
+
+    public String getLastDecision() {
+        return lastDecision;
+    }
+
+    public void setLastDecision(String lastDecision) {
+        this.lastDecision = lastDecision;
     }
 
     public boolean blackJack() {
@@ -91,7 +101,8 @@ public class Player {
                         stringBuilder.append("-");
                     }
                 }
-                return String.format("%s/%f/%s/%f/%s", value.username, value.balance, stringBuilder.toString(), value.bet, value.status);
+                return String.format("%s/%f/%s/%f/%s/%s", value.username, value.balance, stringBuilder.toString(), value.bet,
+                        value.status, value.lastDecision);
             }
 
             @Override
@@ -108,7 +119,8 @@ public class Player {
                         Double.parseDouble(values[1]),
                         newCards,
                         Double.parseDouble(values[3]),
-                        PlayerStatus.valueOf(values[4])
+                        PlayerStatus.valueOf(values[4]),
+                        values[5]
                 );
             }
         };
