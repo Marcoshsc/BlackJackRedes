@@ -15,6 +15,7 @@ public class GameInstance implements Runnable {
 
     private final Game game;
     private final PlayerQueue playerQueue;
+    private Player currentPlayer;
 
     public GameInstance(Game game) {
         this.game = game;
@@ -71,8 +72,6 @@ public class GameInstance implements Runnable {
 
     private void makeDrawPhase() throws IOException {
         game.setStage("draw");
-        Player currentPlayer = playerQueue.dequeue();
-        game.setTurn(currentPlayer.getUsername());
         updatePlayerGames();
         for (int i = 0; i < game.getValidPlayers(); i++) {
             if(currentPlayer.getStatus() != PlayerStatus.PLAYING) {
@@ -102,19 +101,24 @@ public class GameInstance implements Runnable {
         boolean newBet = false;
         game.setStage("bet");
         game.setCurrentBet(currentBet);
+        if(currentPlayer == null) {
+            currentPlayer = playerQueue.dequeue();
+            game.setTurn(currentPlayer.getUsername());
+        }
 //        updatePlayerGames();
         do {
             newBet = false;
             System.out.printf("Current bet: %f\n", currentBet);
-            Player currentPlayer = playerQueue.dequeue();
-            game.setTurn(currentPlayer.getUsername());
-            updatePlayerGames();
             for (int i = 0; i < game.getValidPlayers(); i++) {
                 System.out.printf("%s - %f\n", currentPlayer.getUsername(), currentPlayer.getBet());
                 if(currentPlayer.getStatus() != PlayerStatus.PLAYING)
                     continue;
-                if(currentPlayer.getBet() == currentBet && game.everyoneBetted())
+                if(currentPlayer.getBet() == currentBet && game.everyoneBetted()) {
+                    currentPlayer = playerQueue.dequeue();
+                    game.setTurn(currentPlayer.getUsername());
                     continue;
+                }
+                updatePlayerGames();
                 ConnectionHandler connectionHandler = currentPlayer.getConnectionHandler();
                 RaiseDecision raiseDecision = (RaiseDecision) CommunicationHandler.of(connectionHandler).getMessage(
                         Collections.singletonList(CommunicationTypes.RAISE_DECISION),
@@ -134,7 +138,7 @@ public class GameInstance implements Runnable {
                 if(i != game.getValidPlayers() - 1) {
                     currentPlayer = playerQueue.dequeue();
                     game.setTurn(currentPlayer.getUsername());
-                    updatePlayerGames();
+//                    updatePlayerGames();
                 }
             }
             boolean equal = areBetsEqual();
@@ -149,12 +153,16 @@ public class GameInstance implements Runnable {
             }
         } while(newBet);
 
-        if (!game.shouldCalculateWinners()) {
-            for (Player player : game.getPlayers()) {
-                player.setBetted(false);
-            }
+        for (Player player : game.getPlayers()) {
+            player.setBetted(false);
         }
-        updatePlayerGames();
+//        game.setStage("draw");
+//        if (!game.shouldCalculateWinners()) {
+//            for (Player player : game.getPlayers()) {
+//                player.setBetted(false);
+//            }
+//        }
+//        updatePlayerGames();
     }
 
     private boolean areBetsEqual() {

@@ -64,6 +64,8 @@ public class Game {
         for (Player player : players) {
             if(player.getStatus() != PlayerStatus.PLAYING)
                 continue;
+            if(player.getValue() == 21)
+                return true;
             if (player.getLastDecision() == null || player.getLastDecision().equals("draw")) {
                 should = false;
                 break;

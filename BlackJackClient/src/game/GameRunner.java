@@ -46,11 +46,23 @@ public class GameRunner implements Runnable {
     private void runGame() {
         try {
             while(true) {
-                boolean end = betPhase();
-                if(end) {
-                    break;
+                printGameState();
+                Player player = getThisPlayer();
+                assert player != null;
+                if(game.getStage().equals("bet") && game.getTurn().equals(player.getUsername())) {
+                    System.out.printf("Fase de apostas! O maior valor apostado foi %f, sua aposta foi %f e você precisa igualar se quiser continuar jogando.\n",
+                            game.getCurrentBet(), player.getBet());
+                    System.out.println("Vai betar quanto?");
+                    double bet = scanner.nextDouble();
+                    CommunicationHandler.of(connectionHandler).sendMessage(CommunicationTypes.RAISE_DECISION,
+                            RaiseDecision.networkTransferable(), new RaiseDecision(bet, false));
                 }
-                System.out.println("Fase de apostas concluida! Verificando vencedor...");
+                if(game.getStage().equals("draw") && game.getTurn().equals(player.getUsername())) {
+                    System.out.println("Fase de puxar cartas! Quer puxar outra carta (p) ou manter (m)?");
+                    String answer = scanner.next();
+                    CommunicationHandler.of(connectionHandler).sendMessage(CommunicationTypes.DRAW_DECISION, DrawDecision.networkTransferable(),
+                            new DrawDecision(answer.equals("m")));
+                }
                 CommunicationAnswer answer = CommunicationHandler.of(connectionHandler).getMessage(
                         Arrays.asList(CommunicationTypes.GAME_INFO, CommunicationTypes.GAME_END),
                         Arrays.asList(Game.networkTransferable(), GameEndInfo.gameEndInfoNetworkTransferable()));
@@ -59,10 +71,26 @@ public class GameRunner implements Runnable {
                     System.out.printf("Game ended! %s are the winners with %d points.\n",
                             String.join(",", endInfo.getWinners()), endInfo.getPoints());
                     break;
-                } else {
-                    game = (Game) answer.getValue();
-                    drawPhase();
                 }
+                else {
+                    game = (Game) answer.getValue();
+                }
+//                boolean end = betPhase();
+//                if(end) {
+//                    break;
+//                }
+//                CommunicationAnswer answer = CommunicationHandler.of(connectionHandler).getMessage(
+//                        Arrays.asList(CommunicationTypes.GAME_INFO, CommunicationTypes.GAME_END),
+//                        Arrays.asList(Game.networkTransferable(), GameEndInfo.gameEndInfoNetworkTransferable()));
+//                if (answer.getType() == CommunicationTypes.GAME_END) {
+//                    GameEndInfo endInfo = (GameEndInfo) answer.getValue();
+//                    System.out.printf("Game ended! %s are the winners with %d points.\n",
+//                            String.join(",", endInfo.getWinners()), endInfo.getPoints());
+//                    break;
+//                } else {
+//                    game = (Game) answer.getValue();
+//                    drawPhase();
+//                }
             }
         } catch (IOException exception) {
             exception.printStackTrace();
