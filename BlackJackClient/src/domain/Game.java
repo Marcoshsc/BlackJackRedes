@@ -1,5 +1,7 @@
 package domain;
 
+import domain.enums.PlayerStatus;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,6 +82,23 @@ public class Game {
 
     public Deck getDeck() {
         return deck;
+    }
+
+    public int getValidPlayers() {
+        int number = 0;
+        for (int i = 0; i < players.size(); i++) {
+            if(players.get(i).getStatus() == PlayerStatus.PLAYING)
+                number++;
+        }
+        return number;
+    }
+
+    public boolean everyoneBetted() {
+        for (Player player : players) {
+            if(!player.isBetted())
+                return false;
+        }
+        return true;
     }
 
     public List<Player> getPlayers() {

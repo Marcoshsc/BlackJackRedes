@@ -137,6 +137,7 @@ public class GameInstance implements Runnable {
                 }
                 else {
                     currentPlayer.raiseBet(raiseDecision.getRaiseValue());
+                    currentPlayer.setBetted(true);
                     if(currentBet < currentPlayer.getBet()) {
                         currentBet = currentPlayer.getBet();
                         game.setCurrentBet(currentBet);
@@ -158,6 +159,10 @@ public class GameInstance implements Runnable {
                 currentBet = greater;
             }
         } while(newBet);
+
+        for (Player player : game.getPlayers()) {
+            player.setBetted(false);
+        }
     }
 
     private boolean areBetsEqual() {

@@ -68,7 +68,6 @@ public class GameRunner implements Runnable {
 
     private void drawPhase() throws IOException {
         for(int i = 0; i < game.getPlayers().size(); i++) {
-            System.out.printf("Verification number %d\n", i);
             printGameState();
             Player player = getThisPlayer();
             assert player != null;
@@ -84,23 +83,26 @@ public class GameRunner implements Runnable {
     }
 
     private void betPhase() throws IOException {
+        int stage = 0;
         while(true) {
             Player player = getThisPlayer();
             assert player != null;
             printGameState();
             if(game.getTurn().equals(username) && player.getStatus() == PlayerStatus.PLAYING &&
-                    (player.getBet() < game.getCurrentBet() || game.getCurrentBet() == 0)) {
+                    (player.getBet() < game.getCurrentBet() || !game.everyoneBetted())) {
+                System.out.printf("We are on stage %d\n", stage);
                 System.out.printf("Fase de apostas! O maior valor apostado foi %f, sua aposta foi %f e você precisa igualar se quiser continuar jogando.\n",
                         game.getCurrentBet(), player.getBet());
                 System.out.println("Vai betar quanto?");
                 double bet = scanner.nextDouble();
                 CommunicationHandler.of(connectionHandler).sendMessage(CommunicationTypes.RAISE_DECISION,
                         RaiseDecision.networkTransferable(), new RaiseDecision(bet, false));
+                stage++;
             }
             else {
                 System.out.println("Aguardando " + game.getTurn() + " Betar...");
             }
-            if(areBetsEqual()) {
+            if(game.everyoneBetted() && areBetsEqual()) {
                 break;
             }
             game = (Game) CommunicationHandler.of(connectionHandler).getMessage(Collections.singletonList(CommunicationTypes.GAME_INFO),

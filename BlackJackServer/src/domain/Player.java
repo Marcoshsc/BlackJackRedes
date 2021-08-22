@@ -14,6 +14,7 @@ public class Player {
     private final String username;
     private double balance = 1000d;
     private double bet = 0d;
+    private boolean betted;
     private PlayerStatus status = PlayerStatus.PLAYING;
     private String lastDecision;
     private List<Card> cards = new ArrayList<>();
@@ -24,7 +25,7 @@ public class Player {
     }
 
     public Player(ConnectionHandler connectionHandler, String username, double balance, List<Card> cards, double bet,
-                  PlayerStatus status, String lastDecision) {
+                  PlayerStatus status, String lastDecision, boolean betted) {
         this.connectionHandler = connectionHandler;
         this.username = username;
         this.balance = balance;
@@ -32,6 +33,7 @@ public class Player {
         this.bet = bet;
         this.status = status;
         this.lastDecision = lastDecision;
+        this.betted = betted;
     }
 
     public void raiseBet(double value) {
@@ -90,6 +92,14 @@ public class Player {
         return Math.max(value1, value2);
     }
 
+    public boolean isBetted() {
+        return betted;
+    }
+
+    public void setBetted(boolean betted) {
+        this.betted = betted;
+    }
+
     public static NetworkTransferable<Player> networkTransferable() {
         return new NetworkTransferable<>() {
             @Override
@@ -101,8 +111,8 @@ public class Player {
                         stringBuilder.append("-");
                     }
                 }
-                return String.format("%s/%f/%s/%f/%s/%s", value.username, value.balance, stringBuilder.toString(), value.bet,
-                        value.status, value.lastDecision);
+                return String.format("%s/%f/%s/%f/%s/%s/%s", value.username, value.balance, stringBuilder.toString(), value.bet,
+                        value.status, value.lastDecision, value.betted);
             }
 
             @Override
@@ -120,7 +130,8 @@ public class Player {
                         newCards,
                         Double.parseDouble(values[3]),
                         PlayerStatus.valueOf(values[4]),
-                        values[5]
+                        values[5],
+                        Boolean.parseBoolean(values[6])
                 );
             }
         };
