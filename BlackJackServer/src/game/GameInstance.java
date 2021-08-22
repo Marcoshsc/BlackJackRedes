@@ -21,10 +21,6 @@ public class GameInstance implements Runnable {
     public GameInstance(Game game) {
         this.game = game;
         this.playerQueue = new PlayerQueue(game.getPlayers());
-        for (Player player : game.getPlayers()) {
-            game.drawCard(player);
-            game.drawCard(player);
-        }
     }
 
     @Override
@@ -35,51 +31,7 @@ public class GameInstance implements Runnable {
     private void runGame() {
         try {
             do {
-                double currentBet = 0d;
-                boolean newBet = false;
-                do {
-                    newBet = false;
-                    System.out.printf("Current bet: %f\n", currentBet);
-                    for (int i = 0; i < game.getPlayers().size(); i++) {
-                        Player currentPlayer = playerQueue.dequeue();
-                        game.setTurn(currentPlayer.getUsername());
-                        System.out.printf("%s - %f\n", currentPlayer.getUsername(), currentPlayer.getBet());
-                        if(currentPlayer.getStatus() != PlayerStatus.PLAYING)
-                            continue;
-                        if(currentPlayer.getBet() == currentBet && currentBet != 0d)
-                            continue;
-                        updatePlayerGames();
-                        ConnectionHandler connectionHandler = currentPlayer.getConnectionHandler();
-                        RaiseDecision raiseDecision = (RaiseDecision) CommunicationHandler.of(connectionHandler).getMessage(
-                                Collections.singletonList(CommunicationTypes.RAISE_DECISION),
-                                Collections.singletonList(RaiseDecision.networkTransferable())).getValue();
-                        if(raiseDecision.isResign()) {
-                            currentPlayer.giveUp();
-                        }
-                        else {
-                            currentPlayer.raiseBet(raiseDecision.getRaiseValue());
-                            if(currentBet < currentPlayer.getBet()) {
-                                currentBet = currentPlayer.getBet();
-                                newBet = true;
-                            }
-                        }
-                    }
-                    boolean equal = true;
-                    for (int i = 1; i < game.getPlayers().size(); i++) {
-                        if(game.getPlayers().get(i).getBet() != game.getPlayers().get(0).getBet()) {
-                            equal = false;
-                        }
-                    }
-                    if(!equal) {
-                        double greater = game.getPlayers().get(0).getBet();
-                        for (Player player : game.getPlayers()) {
-                            if(greater < player.getBet())
-                                greater = player.getBet();
-                        }
-                        newBet = true;
-                        currentBet = greater;
-                    }
-                } while(newBet);
+                makeBetPhase();
 
                 List<Player> winners = game.getWinners();
                 System.out.println(winners.size() + " winners");
@@ -104,6 +56,58 @@ public class GameInstance implements Runnable {
         } catch (IOException exc) {
             exc.printStackTrace();
         }
+    }
+
+    private void makeBetPhase() throws IOException {
+        double currentBet = 0d;
+        boolean newBet = false;
+        game.setStage("bet");
+        game.setCurrentBet(currentBet);
+        updatePlayerGames();
+        do {
+            newBet = false;
+            System.out.printf("Current bet: %f\n", currentBet);
+            for (int i = 0; i < game.getPlayers().size(); i++) {
+                Player currentPlayer = playerQueue.dequeue();
+                game.setTurn(currentPlayer.getUsername());
+                System.out.printf("%s - %f\n", currentPlayer.getUsername(), currentPlayer.getBet());
+                if(currentPlayer.getStatus() != PlayerStatus.PLAYING)
+                    continue;
+                if(currentPlayer.getBet() == currentBet && currentBet != 0d)
+                    continue;
+                updatePlayerGames();
+                ConnectionHandler connectionHandler = currentPlayer.getConnectionHandler();
+                RaiseDecision raiseDecision = (RaiseDecision) CommunicationHandler.of(connectionHandler).getMessage(
+                        Collections.singletonList(CommunicationTypes.RAISE_DECISION),
+                        Collections.singletonList(RaiseDecision.networkTransferable())).getValue();
+                if(raiseDecision.isResign()) {
+                    currentPlayer.giveUp();
+                }
+                else {
+                    currentPlayer.raiseBet(raiseDecision.getRaiseValue());
+                    if(currentBet < currentPlayer.getBet()) {
+                        currentBet = currentPlayer.getBet();
+                        game.setCurrentBet(currentBet);
+                        newBet = true;
+                    }
+                }
+            }
+            boolean equal = true;
+            for (int i = 1; i < game.getPlayers().size(); i++) {
+                if(game.getPlayers().get(i).getBet() != game.getPlayers().get(0).getBet()) {
+                    equal = false;
+                }
+            }
+            if(!equal) {
+                double greater = game.getPlayers().get(0).getBet();
+                for (Player player : game.getPlayers()) {
+                    if(greater < player.getBet())
+                        greater = player.getBet();
+                }
+                newBet = true;
+                currentBet = greater;
+            }
+        } while(newBet);
     }
 
     private void updatePlayerGames() throws IOException {

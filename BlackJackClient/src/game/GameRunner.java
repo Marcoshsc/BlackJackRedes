@@ -45,27 +45,48 @@ public class GameRunner implements Runnable {
 
     private void runGame() {
         Player player = getThisPlayer();
+        assert player != null;
         try {
-            while(true) {
-                System.out.println("Suas cartas: ");
-                assert player != null;
-                System.out.println(player.getCards().size() + " Cards.");
-                for (Card card : player.getCards()) {
-                    System.out.printf("%s of %s\n", card.getFaces(), card.getSuit());
-                }
-                if(game.getTurn().equals(username)) {
-                    System.out.println(game.getTurn());
-                    System.out.println("Vai betar quanto?");
-                    double bet = scanner.nextDouble();
-                    CommunicationHandler.of(connectionHandler).sendMessage(CommunicationTypes.RAISE_DECISION,
-                            RaiseDecision.networkTransferable(), new RaiseDecision(bet, false));
-                }
-                System.out.println("Aguardando " + game.getTurn() + " Betar...");
-                game = (Game) CommunicationHandler.of(connectionHandler).getMessage(Collections.singletonList(CommunicationTypes.GAME_INFO),
-                        Collections.singletonList(Game.networkTransferable())).getValue();
-            }
+            betPhase(player);
+            return;
         } catch (IOException exception) {
             exception.printStackTrace();
+        }
+    }
+
+    private void betPhase(Player player) throws IOException {
+        while(true) {
+            printGameState();
+            if(game.getTurn().equals(username) && (player.getBet() < game.getCurrentBet() || game.getCurrentBet() == 0)) {
+                System.out.printf("Fase de apostas! O maior valor apostado foi %f, e você precisa igualar se quiser continuar jogando.\n",
+                        game.getCurrentBet());
+                System.out.println("Vai betar quanto?");
+                double bet = scanner.nextDouble();
+                CommunicationHandler.of(connectionHandler).sendMessage(CommunicationTypes.RAISE_DECISION,
+                        RaiseDecision.networkTransferable(), new RaiseDecision(bet, false));
+            }
+            else {
+                System.out.println("Aguardando " + game.getTurn() + " Betar...");
+            }
+            game = (Game) CommunicationHandler.of(connectionHandler).getMessage(Collections.singletonList(CommunicationTypes.GAME_INFO),
+                    Collections.singletonList(Game.networkTransferable())).getValue();
+        }
+    }
+
+    private void printGameState() {
+        Player player = getThisPlayer();
+        assert player != null;
+        System.out.printf("Você tem %f de saldo e %f apostados.\n", player.getBalance(), player.getBet());
+        System.out.println("Suas cartas: ");
+        System.out.println(player.getCards().size() + " Cards.");
+        for (Card card : player.getCards()) {
+            System.out.printf("%s of %s\n", card.getFaces(), card.getSuit());
+        }
+        System.out.println();
+        System.out.println("Seus oponentes: ");
+        for (Player opponent : game.getPlayers()) {
+            System.out.printf("%s com %f de saldo e %f apostados, status %s\n", opponent.getUsername(),
+                    opponent.getBalance(), opponent.getBet(), opponent.getStatus());
         }
     }
 

@@ -10,14 +10,36 @@ public class Game {
     private final Deck deck = new Deck();
     private final List<Player> players;
     private String turn = null;
+    private String stage;
+    private double currentBet;
 
     public Game(List<Player> players) {
         this.players = players;
+        for (Player player : getPlayers()) {
+            drawCard(player);
+            drawCard(player);
+        }
     }
 
     public void drawCard(Player player) {
         Card card = deck.getCard();
         player.addCard(card);
+    }
+
+    public String getStage() {
+        return stage;
+    }
+
+    public void setStage(String stage) {
+        this.stage = stage;
+    }
+
+    public double getCurrentBet() {
+        return currentBet;
+    }
+
+    public void setCurrentBet(double currentBet) {
+        this.currentBet = currentBet;
     }
 
     public List<Player> getWinners() {
@@ -42,11 +64,13 @@ public class Game {
         return new NetworkTransferable<>() {
             @Override
             public String toTransferString(Game value) {
-                return String.format("%s@%s@%s@%s@%s", playerNetworkTransferable.toTransferString(value.players.get(0)),
+                String gameString = String.format("%s@%s@%s@%s@%s@%s@%f", playerNetworkTransferable.toTransferString(value.players.get(0)),
                         playerNetworkTransferable.toTransferString(value.players.get(1)),
                         playerNetworkTransferable.toTransferString(value.players.get(2)),
                         playerNetworkTransferable.toTransferString(value.players.get(3)),
-                        value.getTurn());
+                        value.getTurn(), value.getStage(), value.currentBet);
+                System.out.println(gameString);
+                return gameString;
             }
 
             @Override
