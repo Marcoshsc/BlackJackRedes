@@ -72,11 +72,13 @@ public class GameInstance implements Runnable {
 
     private void makeDrawPhase() throws IOException {
         game.setStage("draw");
-        updatePlayerGames();
-        for (int i = 0; i < game.getValidPlayers(); i++) {
+        for (int i = 0; i < game.getPlayers().size(); i++) {
             if(currentPlayer.getStatus() != PlayerStatus.PLAYING) {
+                currentPlayer = playerQueue.dequeue();
+                game.setTurn(currentPlayer.getUsername());
                 continue;
             }
+            updatePlayerGames();
             DrawDecision drawDecision = (DrawDecision) CommunicationHandler.of(currentPlayer.getConnectionHandler()).getMessage(
                     Collections.singletonList(CommunicationTypes.DRAW_DECISION),
                     Collections.singletonList(DrawDecision.networkTransferable())
@@ -88,11 +90,8 @@ public class GameInstance implements Runnable {
             else {
                 currentPlayer.setLastDecision("keep");
             }
-            if(i != game.getValidPlayers() - 1) {
-                currentPlayer = playerQueue.dequeue();
-                game.setTurn(currentPlayer.getUsername());
-                updatePlayerGames();
-            }
+            currentPlayer = playerQueue.dequeue();
+            game.setTurn(currentPlayer.getUsername());
         }
     }
 
@@ -111,9 +110,8 @@ public class GameInstance implements Runnable {
             System.out.printf("Current bet: %f\n", currentBet);
             for (int i = 0; i < game.getValidPlayers(); i++) {
                 System.out.printf("%s - %f\n", currentPlayer.getUsername(), currentPlayer.getBet());
-                if(currentPlayer.getStatus() != PlayerStatus.PLAYING)
-                    continue;
-                if(currentPlayer.getBet() == currentBet && game.everyoneBetted()) {
+                if(currentPlayer.getStatus() != PlayerStatus.PLAYING ||
+                        currentPlayer.getBet() == currentBet && game.everyoneBetted()) {
                     currentPlayer = playerQueue.dequeue();
                     game.setTurn(currentPlayer.getUsername());
                     continue;
@@ -141,10 +139,12 @@ public class GameInstance implements Runnable {
 //                    updatePlayerGames();
                 }
             }
-            boolean equal = areBetsEqual();
+            boolean equal = areBetsEqual(currentBet);
             if(!equal) {
                 double greater = game.getPlayers().get(0).getBet();
                 for (Player player : game.getPlayers()) {
+                    if(player.getStatus() != PlayerStatus.PLAYING)
+                        continue;
                     if(greater < player.getBet())
                         greater = player.getBet();
                 }
@@ -165,11 +165,14 @@ public class GameInstance implements Runnable {
 //        updatePlayerGames();
     }
 
-    private boolean areBetsEqual() {
+    private boolean areBetsEqual(double currentBet) {
         boolean equal = true;
-        for (int i = 1; i < game.getPlayers().size(); i++) {
-            if(game.getPlayers().get(i).getBet() != game.getPlayers().get(0).getBet()) {
+        for (int i = 0; i < game.getPlayers().size(); i++) {
+            if(game.getPlayers().get(i).getStatus() != PlayerStatus.PLAYING)
+                continue;
+            if (game.getPlayers().get(i).getBet() != currentBet) {
                 equal = false;
+                break;
             }
         }
         return equal;

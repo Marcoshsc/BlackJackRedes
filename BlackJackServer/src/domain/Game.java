@@ -24,6 +24,7 @@ public class Game {
     public void drawCard(Player player) {
         Card card = deck.getCard();
         player.addCard(card);
+        player.checkBlown();
     }
 
     public int getValidPlayers() {

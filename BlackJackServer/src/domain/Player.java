@@ -70,6 +70,13 @@ public class Player {
         balance += value;
     }
 
+    public void checkBlown() {
+        int value = getValue();
+        if(value > 21) {
+            status = PlayerStatus.BLOWN;
+        }
+    }
+
     public void reset() {
         bet = 0;
         status = PlayerStatus.PLAYING;
