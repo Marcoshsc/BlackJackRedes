@@ -94,17 +94,16 @@ public class GameRunner implements Runnable {
         System.out.println("Suas cartas: ");
         System.out.println(player.getCards().size() + " Cards.");
         for (Card card : player.getCards()) {
-            System.out.printf("%s of %s\n", card.getFaces(), card.getSuit());
+            System.out.printf("%s\n", card);
         }
         System.out.printf("Sua pontuação: %d\n", player.getValue());
         System.out.println();
         System.out.println("Seus oponentes: ");
         for (Player opponent : game.getPlayers()) {
-            System.out.printf("%s com %f de saldo e %f apostados, status %s, primeira carta %s de %s\n", opponent.getUsername(),
-                    opponent.getBalance(), opponent.getBet(), opponent.getStatus(), opponent.getCards().get(0).getFaces(),
-                    opponent.getCards().get(0).getSuit());
+            System.out.printf("%s com %f de saldo e %f apostados, status %s, primeira carta %s \n", opponent.getUsername(),
+                    opponent.getBalance(), opponent.getBet(), opponent.getStatus(), opponent.getCards().get(0));
         }
-        System.out.printf("Carta da casa: %s de %s \n", game.getCroupietCard().getFaces(), game.getCroupietCard().getSuit());
+        System.out.printf("Carta da casa: %s \n", game.getCroupietCard());
         System.out.println("Vez de " + game.getTurn());
     }
 

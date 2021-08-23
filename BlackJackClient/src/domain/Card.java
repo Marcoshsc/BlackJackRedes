@@ -26,4 +26,19 @@ public class Card {
     public Suit getSuit() {
         return suit;
     }
+
+    @Override
+    public String toString() {
+        String print = "\n";
+        print = print.concat("┏-------┓\n");
+        print = print.concat("|       |\n");
+        print = print.concat("|  ").concat(this.faces.getSymbol());
+        if (!this.faces.getSymbol().equals("10")) {
+            print = print.concat(" ");
+        }
+        print = print.concat(this.suit.toString()).concat("  |\n");
+        print = print.concat("|       |\n");
+        print = print.concat("┗-------┛");
+        return print;
+    }
 }
