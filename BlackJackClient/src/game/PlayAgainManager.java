@@ -9,21 +9,31 @@ import main.ConnectionHandler;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class PlayAgainManager implements Runnable {
 
     private final ConnectionHandler connectionHandler;
     private final Player player;
+    private final List<String> winners;
+    private final ScoreCounter scoreCounter;
 
-    public PlayAgainManager(ConnectionHandler connectionHandler, Player player) {
+    public PlayAgainManager(ConnectionHandler connectionHandler, Player player, List<String> winners, ScoreCounter scoreCounter) {
         this.connectionHandler = connectionHandler;
         this.player = player;
+        this.winners = winners;
+        this.scoreCounter = scoreCounter;
     }
 
     @Override
     public void run() {
         Scanner scanner = new Scanner(System.in);
+        for (String winner : winners) {
+            scoreCounter.incrementPlayer(winner);
+        }
+        System.out.println("Estatisticas: ");
+        scoreCounter.print();
         System.out.println();
         System.out.println("Deseja jogar novamente (1 - sim, 0 - não)?");
         int answer = scanner.nextInt();
@@ -44,7 +54,7 @@ public class PlayAgainManager implements Runnable {
             }
             else {
                 Game game = (Game) answerServer.getValue();
-                GameRunner gameRunner = new GameRunner(game, connectionHandler, player.getUsername());
+                GameRunner gameRunner = new GameRunner(game, connectionHandler, scoreCounter, player.getUsername());
                 new Thread(gameRunner).start();
             }
         } catch(IOException exc) {

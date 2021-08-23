@@ -8,6 +8,7 @@ import main.ConnectionHandler;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class GameRunner implements Runnable {
@@ -21,7 +22,7 @@ public class GameRunner implements Runnable {
     public GameRunner(Game game, ConnectionHandler connectionHandler, String username) {
         this.game = game;
         this.connectionHandler = connectionHandler;
-        this.scoreCounter = new ScoreCounter();
+        this.scoreCounter = new ScoreCounter(game);
         this.username = username;
     }
 
@@ -53,6 +54,9 @@ public class GameRunner implements Runnable {
                         if(bet != -1 && bet + player.getBet() < game.getCurrentBet()) {
                             System.out.println("Pelo menos precisa completar a aposta atual, se não aguentar corre!");
                         }
+                        if(bet != -1 && bet > player.getBalance()) {
+                            System.out.println("Não é permitido apostar o que não tem.");
+                        }
                     } while(bet != -1 && bet + player.getBet() < game.getCurrentBet());
                     CommunicationHandler.of(connectionHandler).sendMessage(CommunicationTypes.RAISE_DECISION,
                             RaiseDecision.networkTransferable(), new RaiseDecision(bet, bet == -1));
@@ -71,13 +75,13 @@ public class GameRunner implements Runnable {
                     String winnersInfo = endInfo.getWinners().size() != 0 ? String.join(",", endInfo.getWinners()) : "Casa";
                     System.out.printf("Fim de jogo! %s são os vencedores com %d pontos. A casa ficou com %d pontos.\n", winnersInfo,
                             endInfo.getPoints(), endInfo.getHouse());
+                    goToPlayAgainHandler(endInfo.getWinners());
                     break;
                 }
                 else {
                     game = (Game) answer.getValue();
                 }
             }
-            goToPlayAgainHandler();
         } catch (IOException exception) {
             exception.printStackTrace();
         }
@@ -113,8 +117,8 @@ public class GameRunner implements Runnable {
         return null;
     }
 
-    private void goToPlayAgainHandler() {
-        Thread playAgainThread = new Thread(new PlayAgainManager(connectionHandler, getThisPlayer()));
+    private void goToPlayAgainHandler(List<String> winners) {
+        Thread playAgainThread = new Thread(new PlayAgainManager(connectionHandler, getThisPlayer(), winners, scoreCounter));
         playAgainThread.start();
     }
 

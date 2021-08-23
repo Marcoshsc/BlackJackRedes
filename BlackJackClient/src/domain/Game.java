@@ -1,6 +1,7 @@
 package domain;
 
 import domain.enums.PlayerStatus;
+import game.ScoreCounter;
 
 import java.util.ArrayList;
 import java.util.List;
