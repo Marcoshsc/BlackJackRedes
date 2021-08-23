@@ -1,6 +1,8 @@
 package domain;
 
+import domain.enums.Faces;
 import domain.enums.PlayerStatus;
+import domain.enums.Suit;
 import server.ConnectionHandler;
 
 import java.util.*;
@@ -12,6 +14,10 @@ public class Game {
     private String turn = null;
     private String stage;
     private double currentBet = 0d;
+    private boolean croupietWon = false;
+    private List<Card> croupietCards = new ArrayList<>();
+    private Card croupietCard;
+    private Card croupietSecondCard;
 
     public Game(List<Player> players) {
         this.players = players;
@@ -19,6 +25,10 @@ public class Game {
             drawCard(player);
             drawCard(player);
         }
+        this.croupietCard = deck.getCard();
+        this.croupietSecondCard = deck.getCard();
+        this.croupietCards.add(croupietCard);
+        this.croupietCards.add(croupietSecondCard);
     }
 
     public void drawCard(Player player) {
@@ -34,6 +44,10 @@ public class Game {
                 number++;
         }
         return number;
+    }
+
+    public List<Card> getCroupietCards() {
+        return croupietCards;
     }
 
     public boolean everyoneBetted() {
@@ -75,6 +89,26 @@ public class Game {
         return should;
     }
 
+    public boolean croupietBlackJack() {
+        return (croupietCard.getFaces() == Faces.ACE && croupietCard.getSuit() == Suit.SPADES &&
+                croupietSecondCard.getFaces() == Faces.JACK && croupietSecondCard.getSuit() == Suit.SPADES) ||
+                        (croupietSecondCard.getFaces() == Faces.ACE && croupietSecondCard.getSuit() == Suit.SPADES &&
+                                croupietCard.getFaces() == Faces.JACK && croupietCard.getSuit() == Suit.SPADES);
+    }
+
+    public int croupietValue(List<Card> cards) {
+        int value1 = 0;
+        int value2 = 0;
+        for (Card card: cards) {
+            value1 += card.getFaces().getValue1();
+            value2 += card.getFaces().getValue2();
+        }
+        if(value1 > 21 || value2 > 21) {
+            return Math.min(value2, value1);
+        }
+        return Math.max(value1, value2);
+    }
+
     public void gameWon(List<Player> winners) {
         List<Player> losers = new ArrayList<>();
         for (Player player : players) {
@@ -83,12 +117,18 @@ public class Game {
             losers.add(player);
         }
         double totalMoney = 0d;
+        double greaterBet = -1;
         for (Player player : losers) {
             totalMoney += player.getBet();
+            if(greaterBet < player.getBet()) {
+                greaterBet = player.getBet();
+            }
         }
+        totalMoney += greaterBet;
 
         if(!winners.isEmpty()) {
-            double forEach = totalMoney / winners.size();
+            int size = croupietWon ? winners.size() + 1 : winners.size();
+            double forEach = totalMoney / size;
             for (Player player : winners) {
                 player.increaseBalance(forEach);
             }
@@ -101,6 +141,8 @@ public class Game {
     }
 
     public List<Player> getWinners() {
+        croupietWon = croupietBlackJack();
+        int croupietPoints = croupietValue(Arrays.asList(croupietCard, croupietSecondCard));
         List<Player> winners = new ArrayList<>();
         boolean blackJack = false;
         for (Player player : players) {
@@ -112,6 +154,8 @@ public class Game {
             int points = player.getValue();
             if(points == 21 && !blackJack) {
                 winners.add(player);
+                if(croupietPoints == 21)
+                    croupietWon = true;
             }
         }
         if(winners.isEmpty()) {
@@ -122,9 +166,22 @@ public class Game {
                     greater = score;
                 }
             }
-            for (Player player : players) {
-                if(player.getValue() == greater) {
-                    winners.add(player);
+            int newCroupietPoints = croupietPoints;
+            while(newCroupietPoints < greater) {
+                Card card = deck.getCard();
+                croupietCards.add(card);
+                if(newCroupietPoints + card.getFaces().getValue2() > 21) {
+                    newCroupietPoints += card.getFaces().getValue1();
+                }
+                else {
+                    newCroupietPoints += card.getFaces().getValue2();
+                }
+            }
+            if(newCroupietPoints == croupietPoints) {
+                for (Player player : players) {
+                    if (player.getValue() == greater) {
+                        winners.add(player);
+                    }
                 }
             }
         }
@@ -136,24 +193,21 @@ public class Game {
         return new NetworkTransferable<>() {
             @Override
             public String toTransferString(Game value) {
-                String gameString = String.format("%s@%s@%s@%s@%s@%s@%f", playerNetworkTransferable.toTransferString(value.players.get(0)),
+                return String.format("%s@%s@%s@%s@%s@%s@%f", playerNetworkTransferable.toTransferString(value.players.get(0)),
                         playerNetworkTransferable.toTransferString(value.players.get(1)),
                         playerNetworkTransferable.toTransferString(value.players.get(2)),
                         playerNetworkTransferable.toTransferString(value.players.get(3)),
                         value.getTurn(), value.getStage(), value.currentBet);
-                System.out.println(gameString);
-                return gameString;
             }
 
             @Override
             public String toTransferString(Game value, String context) {
-                String gameString = String.format("%s@%s@%s@%s@%s@%s@%f", playerNetworkTransferable.toTransferString(value.players.get(0), context),
+                return String.format("%s@%s@%s@%s@%s@%s@%f@%s", playerNetworkTransferable.toTransferString(value.players.get(0), context),
                         playerNetworkTransferable.toTransferString(value.players.get(1), context),
                         playerNetworkTransferable.toTransferString(value.players.get(2), context),
                         playerNetworkTransferable.toTransferString(value.players.get(3), context),
-                        value.getTurn(), value.getStage(), value.currentBet);
-                System.out.println(gameString);
-                return gameString;
+                        value.getTurn(), value.getStage(), value.currentBet, String.format("%s*%s",
+                                value.croupietCard.getFaces(), value.croupietCard.getSuit()));
             }
 
             @Override

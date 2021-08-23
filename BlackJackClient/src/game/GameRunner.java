@@ -68,8 +68,9 @@ public class GameRunner implements Runnable {
                         Arrays.asList(Game.networkTransferable(), GameEndInfo.gameEndInfoNetworkTransferable()));
                 if (answer.getType() == CommunicationTypes.GAME_END) {
                     GameEndInfo endInfo = (GameEndInfo) answer.getValue();
-                    System.out.printf("Game ended! %s are the winners with %d points.\n",
-                            String.join(",", endInfo.getWinners()), endInfo.getPoints());
+                    String winnersInfo = endInfo.getWinners().size() != 0 ? String.join(",", endInfo.getWinners()) : "Casa";
+                    System.out.printf("Fim de jogo! %s são os vencedores com %d pontos. A casa ficou com %d pontos.\n", winnersInfo,
+                            endInfo.getPoints(), endInfo.getHouse());
                     break;
                 }
                 else {
@@ -122,10 +123,10 @@ public class GameRunner implements Runnable {
                     (player.getBet() < game.getCurrentBet() || !game.everyoneBetted())) {
                 System.out.printf("Fase de apostas! O maior valor apostado foi %f, sua aposta foi %f e você precisa igualar se quiser continuar jogando.\n",
                         game.getCurrentBet(), player.getBet());
-                System.out.println("Vai betar quanto?");
+                System.out.println("Vai betar quanto? Pra desistir digite -1.");
                 double bet = scanner.nextDouble();
                 CommunicationHandler.of(connectionHandler).sendMessage(CommunicationTypes.RAISE_DECISION,
-                        RaiseDecision.networkTransferable(), new RaiseDecision(bet, false));
+                        RaiseDecision.networkTransferable(), new RaiseDecision(bet, bet == -1));
             } else {
                 System.out.println("Aguardando " + game.getTurn() + " Betar...");
             }
@@ -140,21 +141,22 @@ public class GameRunner implements Runnable {
                 Arrays.asList(Game.networkTransferable(), GameEndInfo.gameEndInfoNetworkTransferable()));
         if (answer.getType() == CommunicationTypes.GAME_END) {
             GameEndInfo endInfo = (GameEndInfo) answer.getValue();
-            System.out.printf("Game ended! %s are the winners with %d points.\n",
-                    String.join(",", endInfo.getWinners()), endInfo.getPoints());
+            String winnersInfo = endInfo.getWinners().size() != 0 ? String.join(",", endInfo.getWinners()) : "Casa";
+            System.out.printf("Fim de jogo! %s são os vencedores com %d pontos. A casa ficou com %d pontos.\n", winnersInfo,
+                    endInfo.getPoints(), endInfo.getHouse());
             return true;
         }
         return false;
     }
 
 
-        private boolean areBetsEqual() {
-            if(game.getCurrentBet() == 0d) {
+    private boolean areBetsEqual() {
+        if (game.getCurrentBet() == 0d) {
             return false;
         }
         boolean equal = true;
         for (int i = 1; i < game.getPlayers().size(); i++) {
-            if(game.getPlayers().get(i).getBet() != game.getPlayers().get(0).getBet()) {
+            if (game.getPlayers().get(i).getBet() != game.getPlayers().get(0).getBet()) {
                 equal = false;
             }
         }
@@ -178,6 +180,7 @@ public class GameRunner implements Runnable {
                     opponent.getBalance(), opponent.getBet(), opponent.getStatus(), opponent.getCards().get(0).getFaces(),
                     opponent.getCards().get(0).getSuit());
         }
+        System.out.printf("Carta da casa: %s de %s \n", game.getCroupietCard().getFaces(), game.getCroupietCard().getSuit());
         System.out.println("Vez de " + game.getTurn());
     }
 

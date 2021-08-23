@@ -13,12 +13,14 @@ public class Game {
     private final String turn;
     private final String stage;
     private final double currentBet;
+    private final Card croupietCard;
 
-    public Game(List<Player> players, String turn, String stage, double currentBet) {
+    public Game(List<Player> players, String turn, String stage, double currentBet, Card croupietCard) {
         this.players = players;
         this.turn = turn;
         this.stage = stage;
         this.currentBet = currentBet;
+        this.croupietCard = croupietCard;
     }
 
     public void drawCard(Player player) {
@@ -76,9 +78,13 @@ public class Game {
                     String string = splitted[i];
                     players.add(Player.networkTransferable().fromTransferString(string));
                 }
-                return new Game(players, splitted[4], splitted[5], Double.parseDouble(splitted[6]));
+                return new Game(players, splitted[4], splitted[5], Double.parseDouble(splitted[6]), new Card(splitted[7]));
             }
         };
+    }
+
+    public Card getCroupietCard() {
+        return croupietCard;
     }
 
     public Deck getDeck() {

@@ -66,7 +66,7 @@ public class GameInstance implements Runnable {
         for (Player player : game.getPlayers()) {
             CommunicationHandler.of(player.getConnectionHandler()).sendMessage(CommunicationTypes.GAME_END,
                     GameEndInfo.gameEndInfoNetworkTransferable(), new GameEndInfo(winnerUsernames,
-                            winners.isEmpty() ? -1 : winners.get(0).getValue()));
+                            winners.isEmpty() ? -1 : winners.get(0).getValue(), game.croupietValue(game.getCroupietCards())));
         }
     }
 
