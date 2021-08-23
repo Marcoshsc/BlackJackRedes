@@ -30,7 +30,8 @@ public class PlayAgainManager implements Runnable {
     public void run() {
         Scanner scanner = new Scanner(System.in);
         for (String winner : winners) {
-            scoreCounter.incrementPlayer(winner);
+            String username = winner.split("\n")[0];
+            scoreCounter.incrementPlayer(username);
         }
         scoreCounter.incrementGames();
         System.out.println("Estatisticas: ");

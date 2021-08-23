@@ -72,9 +72,8 @@ public class GameRunner implements Runnable {
                         Arrays.asList(Game.networkTransferable(), GameEndInfo.gameEndInfoNetworkTransferable()));
                 if (answer.getType() == CommunicationTypes.GAME_END) {
                     GameEndInfo endInfo = (GameEndInfo) answer.getValue();
-                    String winnersInfo = endInfo.getWinners().size() != 0 ? String.join(",", endInfo.getWinners()) : "Casa";
-                    System.out.printf("Fim de jogo! %s são os vencedores com %d pontos. A casa ficou com %d pontos.\n", winnersInfo,
-                            endInfo.getPoints(), endInfo.getHouse());
+                    String winnersInfo = endInfo.getWinners().size() != 0 ? String.join(",\n", endInfo.getWinners()) : "Casa";
+                    System.out.printf("Fim de jogo! Vencedores:\n %s.\n\n", winnersInfo);
                     goToPlayAgainHandler(endInfo.getWinners());
                     break;
                 }

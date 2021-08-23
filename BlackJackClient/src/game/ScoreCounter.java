@@ -15,6 +15,7 @@ public class ScoreCounter {
         for (Player player : game.getPlayers()) {
             wins.put(player.getUsername(), 0);
         }
+        wins.put("CASA", 0);
     }
 
     public synchronized void incrementPlayer(String username) {

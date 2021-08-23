@@ -76,20 +76,25 @@ public class GameInstance implements Runnable {
         List<String> winnerUsernames = new ArrayList<>();
         for (Player player : winners) {
             String winnerNameAndCards = player.getUsername();
-            winnerNameAndCards.concat("\n CARTAS:");
-            player.getCards().forEach(card -> {
-                winnerNameAndCards.concat(card.toString());
-            });
-
+            winnerNameAndCards = winnerNameAndCards.concat("\n CARTAS:");
+            for (Card card : player.getCards()) {
+                winnerNameAndCards = winnerNameAndCards.concat(card.toString());
+            }
             winnerUsernames.add(winnerNameAndCards);
         }
-        winnerUsernames.forEach(p -> {
-            System.out.println(p);
-        });
+        if(game.isCroupietWon()) {
+            String croupietString = "CASA";
+            croupietString = croupietString.concat("\n CARTAS:");
+            for (Card card : game.getCroupietCards()) {
+                croupietString = croupietString.concat(card.toString());
+            }
+            winnerUsernames.add(croupietString);
+        }
         for (Player player : game.getPlayers()) {
             CommunicationHandler.of(player.getConnectionHandler()).sendMessage(CommunicationTypes.GAME_END,
                     GameEndInfo.gameEndInfoNetworkTransferable(), new GameEndInfo(winnerUsernames,
-                            winners.isEmpty() ? -1 : winners.get(0).getValue(), game.croupietValue(game.getCroupietCards())));
+                            winners.isEmpty() ? game.croupietValue(game.getCroupietCards()) : winners.get(0).getValue(),
+                            game.croupietValue(game.getCroupietCards())));
         }
     }
 
