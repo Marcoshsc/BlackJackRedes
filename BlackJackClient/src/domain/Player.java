@@ -121,9 +121,9 @@ public class Player {
                 }
                 return new Player(
                         values[0],
-                        Double.parseDouble(values[1]),
+                        Double.parseDouble(values[1].replace(",", ".")),
                         newCards,
-                        Double.parseDouble(values[3]),
+                        Double.parseDouble(values[3].replace(",", ".")),
                         PlayerStatus.valueOf(values[4]),
                         values[5],
                         Boolean.parseBoolean(values[6])

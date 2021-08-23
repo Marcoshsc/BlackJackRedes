@@ -72,7 +72,7 @@ public class Game {
                     String string = splitted[i];
                     players.add(Player.networkTransferable().fromTransferString(string));
                 }
-                return new Game(players, splitted[4], splitted[5], Double.parseDouble(splitted[6]), new Card(splitted[7]));
+                return new Game(players, splitted[4], splitted[5], Double.parseDouble(splitted[6].replace(",", ".")), new Card(splitted[7]));
             }
         };
     }

@@ -30,7 +30,7 @@ public class RaiseDecision {
             @Override
             public RaiseDecision fromTransferString(String transferString, ConnectionHandler connectionHandler) {
                 String[] splitted = transferString.split("/");
-                return new RaiseDecision(Double.parseDouble(splitted[0]), Boolean.parseBoolean(splitted[1]));
+                return new RaiseDecision(Double.parseDouble(splitted[0].replace(",", ".")), Boolean.parseBoolean(splitted[1]));
             }
         };
     }
