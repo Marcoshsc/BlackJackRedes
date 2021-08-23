@@ -31,7 +31,9 @@ public class GameInstance implements Runnable {
         try {
             int i = 0;
             do {
-                makeBetPhase();
+                if(i == 0 || !game.shouldCalculateWinners()) {
+                    makeBetPhase();
+                }
 
                 if(i == 0) {
                     List<Player> winners = game.getWinners(true);
