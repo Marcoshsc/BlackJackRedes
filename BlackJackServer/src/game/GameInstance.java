@@ -75,8 +75,17 @@ public class GameInstance implements Runnable {
     private void communicateGameEnd(List<Player> winners) throws IOException {
         List<String> winnerUsernames = new ArrayList<>();
         for (Player player : winners) {
-            winnerUsernames.add(player.getUsername());
+            String winnerNameAndCards = player.getUsername();
+            winnerNameAndCards.concat("\n CARTAS:");
+            player.getCards().forEach(card -> {
+                winnerNameAndCards.concat(card.toString());
+            });
+
+            winnerUsernames.add(winnerNameAndCards);
         }
+        winnerUsernames.forEach(p -> {
+            System.out.println(p);
+        });
         for (Player player : game.getPlayers()) {
             CommunicationHandler.of(player.getConnectionHandler()).sendMessage(CommunicationTypes.GAME_END,
                     GameEndInfo.gameEndInfoNetworkTransferable(), new GameEndInfo(winnerUsernames,

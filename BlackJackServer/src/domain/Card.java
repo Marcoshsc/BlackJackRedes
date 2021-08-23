@@ -26,4 +26,31 @@ public class Card {
     public Suit getSuit() {
         return suit;
     }
+
+
+    @Override
+    public String toString() {
+        String symbol;
+
+        if (this.suit.equals(Suit.SPADES)) {
+            symbol = "♠";
+        } else if (this.suit.equals(Suit.CLUBS)) {
+            symbol = "♣";
+        } else if (this.suit.equals(Suit.DIAMONDS)) {
+            symbol = "♦";
+        } else {
+            symbol = "♥";
+        }
+        String print = "\n";
+        print = print.concat("┏-------┓\n");
+        print = print.concat("|       |\n");
+        print = print.concat("|  ").concat(this.faces.getSymbol());
+        if (!this.faces.getSymbol().equals("10")) {
+            print = print.concat(" ");
+        }
+        print = print.concat(symbol).concat("  |\n");
+        print = print.concat("|       |\n");
+        print = print.concat("┗-------┛");
+        return print;
+    }
 }
