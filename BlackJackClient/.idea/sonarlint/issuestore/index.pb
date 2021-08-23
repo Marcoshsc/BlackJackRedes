@@ -17,7 +17,5 @@ I
 src/game/GameManager.java,b/5/b5fb58f6636dc47e351cad7f522b988a4bee49e5
 O
 src/main/ConnectionHandler.java,9/8/98eff0220e6e9778b2de8fc9189271cf89e18cfd
-D
-src/domain/Move.java,7/6/76f9a31d64f93a32e35104d700e60ed1142c2753
 H
 src/game/GameRunner.java,c/9/c93287cefdf562baf43fa7067fe9ec49294ffb87

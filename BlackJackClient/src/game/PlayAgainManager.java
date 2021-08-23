@@ -15,25 +15,15 @@ public class PlayAgainManager implements Runnable {
 
     private final ConnectionHandler connectionHandler;
     private final Player player;
-    private final ScoreCounter prevScore;
-    private final boolean isP1;
 
-    public PlayAgainManager(ConnectionHandler connectionHandler, Player player, ScoreCounter prevScore, boolean isP1) {
+    public PlayAgainManager(ConnectionHandler connectionHandler, Player player) {
         this.connectionHandler = connectionHandler;
         this.player = player;
-        this.prevScore = prevScore;
-        this.isP1 = isP1;
     }
 
     @Override
     public void run() {
         Scanner scanner = new Scanner(System.in);
-        int p1Score = isP1 ? prevScore.getP1Score() : prevScore.getP2Score();
-        int p2Score = isP1 ? prevScore.getP2Score() : prevScore.getP1Score();
-        int games = prevScore.getGames();
-        System.out.println("Você tem " + p1Score + " pontos.");
-        System.out.println("Seu adversário tem " + p2Score + " pontos.");
-        System.out.println("Vocês já jogaram " + games + " jogos.");
         System.out.println();
         System.out.println("Deseja jogar novamente (1 - sim, 0 - não)?");
         int answer = scanner.nextInt();
@@ -49,13 +39,13 @@ public class PlayAgainManager implements Runnable {
                     Arrays.asList(null, Game.networkTransferable())
             );
             if(answerServer.getType() == CommunicationTypes.LEAVE) {
-                System.out.println("Seu oponente não quer jogar mais!");
+                System.out.println("Algum(uns) de seus oponentes desistiram de jogar mais!");
                 return;
             }
             else {
                 Game game = (Game) answerServer.getValue();
-//                GameRunner gameRunner = new GameRunner(game, connectionHandler, player, prevScore);
-//                new Thread(gameRunner).start();
+                GameRunner gameRunner = new GameRunner(game, connectionHandler, player.getUsername());
+                new Thread(gameRunner).start();
             }
         } catch(IOException exc) {
             exc.printStackTrace();

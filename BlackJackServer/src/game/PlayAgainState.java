@@ -6,43 +6,58 @@ import domain.Game;
 import domain.Player;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlayAgainState {
 
-    private boolean p1Wants = false;
-    private boolean p2Wants = false;
-    private final Player p1;
-    private final Player p2;
+    private List<Boolean> wantsArray = new ArrayList<>();
+    private Game game;
 
-    public PlayAgainState(Player p1, Player p2) {
-        this.p1 = p1;
-        this.p2 = p2;
-    }
-
-    public synchronized void setP1Wants() throws IOException {
-        p1Wants = true;
-        if(p2Wants) {
-            createNewGame();
+    public PlayAgainState(Game game) {
+        this.game = game;
+        for (Player ignored : game.getPlayers()) {
+            wantsArray.add(null);
         }
     }
 
-    public synchronized void setP2Wants() throws IOException {
-        p2Wants = true;
-        if(p1Wants) {
+    public synchronized void wants(Player player, boolean value) throws IOException {
+        int position = game.getPlayers().indexOf(player);
+        wantsArray.set(position, value);
+        checkWanting();
+    }
+
+    public synchronized void checkWanting() throws IOException {
+        boolean allWants = true;
+        boolean allAnswered = true;
+        for (Boolean value : wantsArray) {
+            if(value == null) {
+                allAnswered = false;
+            }
+            if(value != null && !value) {
+                allWants = false;
+            }
+        }
+        if(!allAnswered) {
+            return;
+        }
+        if(allWants) {
+            System.out.println("creating a new game");
             createNewGame();
+        }
+        else {
+            System.out.println("Finishing the game");
+            for (Player player : game.getPlayers()) {
+                CommunicationHandler.of(player.getConnectionHandler()).sendMessage(CommunicationTypes.LEAVE);
+            }
         }
     }
 
     private void createNewGame() throws IOException {
-//        Game game = new Game(p1, p2);
-        Game game = null;
-        if(p1.getConnectionHandler() != null) {
-            CommunicationHandler.of(p1.getConnectionHandler()).sendMessage(CommunicationTypes.GAME_FOUND,
-                    Game.networkTransferable(), game);
-        }
-        if(p2.getConnectionHandler() != null) {
-            CommunicationHandler.of(p2.getConnectionHandler()).sendMessage(CommunicationTypes.GAME_FOUND,
-                    Game.networkTransferable(), game);
+        game.reset();
+        for (Player player : game.getPlayers()) {
+            CommunicationHandler.of(player.getConnectionHandler()).sendMessage(CommunicationTypes.GAME_FOUND,
+                    Game.networkTransferable(), player.getUsername(), game);
         }
         GameInstance gameInstance = new GameInstance(game);
         new Thread(gameInstance).start();

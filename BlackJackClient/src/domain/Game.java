@@ -8,7 +8,6 @@ import java.util.List;
 public class Game {
 
 
-    private final Deck deck = new Deck();
     private final List<Player> players;
     private final String turn;
     private final String stage;
@@ -21,11 +20,6 @@ public class Game {
         this.stage = stage;
         this.currentBet = currentBet;
         this.croupietCard = croupietCard;
-    }
-
-    public void drawCard(Player player) {
-        Card card = deck.getCard();
-        player.addCard(card);
     }
 
     public double getCurrentBet() {
@@ -71,7 +65,6 @@ public class Game {
 
             @Override
             public Game fromTransferString(String transferString) {
-                System.out.println(transferString);
                 String[] splitted = transferString.split("@");
                 List<Player> players = new ArrayList<>();
                 for (int i = 0; i < 4; i++) {
@@ -85,10 +78,6 @@ public class Game {
 
     public Card getCroupietCard() {
         return croupietCard;
-    }
-
-    public Deck getDeck() {
-        return deck;
     }
 
     public int getValidPlayers() {

@@ -1,5 +1,6 @@
 package domain;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,8 +36,10 @@ public class GameEndInfo {
 
             @Override
             public GameEndInfo fromTransferString(String transferString) {
+                System.out.println(transferString);
                 String[] values = transferString.split("-");
-                return new GameEndInfo(Arrays.asList(values[0].split(",")), Integer.parseInt(values[1]), Integer.parseInt(values[2]));
+                return new GameEndInfo(values[0].equals("") ? new ArrayList<>() : Arrays.asList(values[0].split(",")),
+                        Integer.parseInt(values[1]), Integer.parseInt(values[2]));
             }
         };
     }

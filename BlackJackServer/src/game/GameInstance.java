@@ -53,6 +53,12 @@ public class GameInstance implements Runnable {
                 makeDrawPhase();
 
             } while (true);
+            PlayAgainState playAgainState = new PlayAgainState(game);
+            for (Player player : game.getPlayers()) {
+                PlayerChoiceThread playerChoiceThread = new PlayerChoiceThread(player, playAgainState);
+                Thread thread = new Thread(playerChoiceThread);
+                thread.start();
+            }
         } catch (IOException exc) {
             exc.printStackTrace();
         }

@@ -15,12 +15,8 @@ Q
 !src/server/ConnectionHandler.java,c/8/c8e3d4dde343d72539c64a3f99b68792612e8573
 I
 src/domain/LobbyUser.java,f/f/ffb33f7cc81e12000beaf670a7efb544ab8d3b0e
-R
-"src/server/TicTacToeTCPServer.java,6/0/60a29e4c9bf926eb76a68b4d5b31dadbfce310c7
 Y
 )src/communication/CommunicationTypes.java,3/f/3f53478adc7d597f3d1c12cd6f1e0a0659e949e2
-D
-src/domain/Move.java,7/6/76f9a31d64f93a32e35104d700e60ed1142c2753
 [
 +src/communication/CommunicationHandler.java,2/c/2c0ecc3c0af6e375964fa50901103182db7c3c1f
 L
