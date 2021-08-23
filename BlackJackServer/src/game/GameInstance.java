@@ -35,6 +35,12 @@ public class GameInstance implements Runnable {
 
                 if(i == 0) {
                     List<Player> winners = game.getWinners();
+                    System.out.println(game.isCroupietWon());
+                    if(game.isCroupietWon()) {
+                        game.gameWon(winners);
+                        communicateGameEnd(winners);
+                        break;
+                    }
                     if(!winners.isEmpty() && winners.get(0).getValue() == 21) {
                         game.gameWon(winners);
                         communicateGameEnd(winners);

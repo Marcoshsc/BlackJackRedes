@@ -12,7 +12,7 @@ public class GameEndInfo {
 
     public GameEndInfo(List<String> winners, int points, int house) {
         this.winners = winners;
-        this.points = points;
+        this.points = points == -1 ? house : points;
         this.house = house;
     }
 
@@ -32,9 +32,8 @@ public class GameEndInfo {
         return new NetworkTransferable<>() {
             @Override
             public String toTransferString(GameEndInfo value) {
-                String str = String.format("%s-%d-%d", String.join(",", value.winners), value.points, value.house);
-                System.out.println(str);
-                return str;
+                String join = String.join(",", value.winners);
+                return String.format("%s-%d-%d", join, value.points, value.house);
             }
 
             @Override

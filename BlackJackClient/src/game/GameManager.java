@@ -25,17 +25,24 @@ public class GameManager {
     }
 
     private void registerPlayer() throws IOException {
-        PlayerInfoReader playerInfoReader = new PlayerInfoReader();
-        Player player = playerInfoReader.readInfo();
-        CommunicationHandler.of(connectionHandler).sendMessage(
-                CommunicationTypes.INFORMATION,
-                Player.networkTransferable(),
-                player
-        );
-        CommunicationAnswer answer = CommunicationHandler.of(connectionHandler).getMessage(
-                Arrays.asList(CommunicationTypes.LOBBY, CommunicationTypes.GAME_FOUND),
-                Arrays.asList(null, Game.networkTransferable())
-        );
+        CommunicationAnswer answer;
+        Player player;
+        while(true) {
+            PlayerInfoReader playerInfoReader = new PlayerInfoReader();
+            player = playerInfoReader.readInfo();
+            CommunicationHandler.of(connectionHandler).sendMessage(
+                    CommunicationTypes.INFORMATION,
+                    Player.networkTransferable(),
+                    player
+            );
+            answer = CommunicationHandler.of(connectionHandler).getMessage(
+                    Arrays.asList(CommunicationTypes.LOBBY, CommunicationTypes.GAME_FOUND, CommunicationTypes.INVALID_USERNAME),
+                    Arrays.asList(null, Game.networkTransferable(), null)
+            );
+            if(answer.getType() != CommunicationTypes.INVALID_USERNAME)
+                break;
+            System.out.println("Nome de usuario ja existente! Escolha outro...");
+        }
         if(answer.getType() == CommunicationTypes.LOBBY) {
             System.out.println("Você foi colocado no lobby! Lhe avisaremos assim que encontrarmos um oponente para você!");
             CommunicationAnswer gameFoundAnswer = CommunicationHandler.of(connectionHandler).getMessage(

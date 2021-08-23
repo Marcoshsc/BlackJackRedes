@@ -35,10 +35,18 @@ public class GameManager implements Runnable {
 
     private void findGame() {
         try {
-            lobbyUser = (LobbyUser) CommunicationHandler.of(connectionHandler).getMessage(
-                    Collections.singletonList(CommunicationTypes.INFORMATION),
-                    Collections.singletonList(LobbyUser.networkTransferable())
-            ).getValue();
+            while(true) {
+                lobbyUser = (LobbyUser) CommunicationHandler.of(connectionHandler).getMessage(
+                        Collections.singletonList(CommunicationTypes.INFORMATION),
+                        Collections.singletonList(LobbyUser.networkTransferable())
+                ).getValue();
+                if(lobbyManager.existsOnLobby(lobbyUser)) {
+                    CommunicationHandler.of(connectionHandler).sendMessage(CommunicationTypes.INVALID_USERNAME);
+                }
+                else {
+                    break;
+                }
+            }
             List<LobbyUser> opponents = findOpponents();
             if(opponents.size() == 3) {
                 for (LobbyUser lobbyUser : opponents) {

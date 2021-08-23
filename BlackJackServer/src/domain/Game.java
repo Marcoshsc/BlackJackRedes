@@ -67,6 +67,10 @@ public class Game {
         return croupietCards;
     }
 
+    public boolean isCroupietWon() {
+        return croupietWon;
+    }
+
     public boolean everyoneBetted() {
         for (Player player : players) {
             if(!player.isBetted())
@@ -114,16 +118,17 @@ public class Game {
     }
 
     public int croupietValue(List<Card> cards) {
-        int value1 = 0;
-        int value2 = 0;
-        for (Card card: cards) {
-            value1 += card.getFaces().getValue1();
-            value2 += card.getFaces().getValue2();
-        }
-        if(value1 <= 21 || value2 <= 21) {
-            return Math.max(value2, value1);
-        }
-        return Math.min(value1, value2);
+        return 21;
+//        int value1 = 0;
+//        int value2 = 0;
+//        for (Card card: cards) {
+//            value1 += card.getFaces().getValue1();
+//            value2 += card.getFaces().getValue2();
+//        }
+//        if(value1 <= 21 || value2 <= 21) {
+//            return Math.max(value2, value1);
+//        }
+//        return Math.min(value1, value2);
     }
 
     public void gameWon(List<Player> winners) {
@@ -160,6 +165,7 @@ public class Game {
     public List<Player> getWinners() {
         croupietWon = croupietBlackJack();
         int croupietPoints = croupietValue(Arrays.asList(croupietCard, croupietSecondCard));
+        croupietWon = croupietWon || croupietPoints == 21;
         List<Player> winners = new ArrayList<>();
         boolean blackJack = false;
         for (Player player : players) {
@@ -175,7 +181,7 @@ public class Game {
                     croupietWon = true;
             }
         }
-        if(winners.isEmpty()) {
+        if(winners.isEmpty() && !croupietWon) {
             int greater = -1;
             for(Player player : players) {
                 int score = player.getValue();
@@ -201,6 +207,7 @@ public class Game {
             System.out.println(newCroupietPoints);
             System.out.println(greater);
             if(newCroupietPoints > 21 || newCroupietPoints == greater) {
+                croupietWon = true;
                 for (Player player : players) {
                     if (player.getValue() == greater) {
                         winners.add(player);

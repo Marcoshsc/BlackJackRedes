@@ -19,6 +19,14 @@ public class LobbyManager {
         notifyAll();
     }
 
+    public synchronized boolean existsOnLobby(LobbyUser user) {
+        for (LobbyUser lobbyUser : lobbyUsers) {
+            if(user.getUsername().equals(lobbyUser.getUsername()))
+                return true;
+        }
+        return false;
+    }
+
     public List<LobbyUser> getLobbyUsers() {
         return lobbyUsers;
     }

@@ -49,10 +49,10 @@ public class GameRunner implements Runnable {
                 if(game.getStage().equals("bet") && game.getTurn().equals(player.getUsername())) {
                     System.out.printf("Fase de apostas! O maior valor apostado foi %f, sua aposta foi %f e você precisa igualar se quiser continuar jogando.\n",
                             game.getCurrentBet(), player.getBet());
-                    System.out.println("Vai betar quanto?");
+                    System.out.println("Vai betar quanto? Pra correr digite -1.");
                     double bet = scanner.nextDouble();
                     CommunicationHandler.of(connectionHandler).sendMessage(CommunicationTypes.RAISE_DECISION,
-                            RaiseDecision.networkTransferable(), new RaiseDecision(bet, false));
+                            RaiseDecision.networkTransferable(), new RaiseDecision(bet, bet == -1));
                 }
                 if(game.getStage().equals("draw") && game.getTurn().equals(player.getUsername())) {
                     System.out.println("Fase de puxar cartas! Quer puxar outra carta (p) ou manter (m)?");
@@ -78,19 +78,6 @@ public class GameRunner implements Runnable {
         } catch (IOException exception) {
             exception.printStackTrace();
         }
-    }
-
-    private boolean areBetsEqual() {
-        if (game.getCurrentBet() == 0d) {
-            return false;
-        }
-        boolean equal = true;
-        for (int i = 1; i < game.getPlayers().size(); i++) {
-            if (game.getPlayers().get(i).getBet() != game.getPlayers().get(0).getBet()) {
-                equal = false;
-            }
-        }
-        return equal;
     }
 
     private void printGameState() {
