@@ -5,12 +5,12 @@ import game.GameManager;
 import java.io.IOException;
 import java.net.Socket;
 
-public class TicTacToeTCPClient implements Runnable {
+public class BlackJackTCPClient implements Runnable {
 
     private final String host;
     private final int port;
 
-    public TicTacToeTCPClient(String host, int port) {
+    public BlackJackTCPClient(String host, int port) {
         this.host = host;
         this.port = port;
     }
