@@ -32,6 +32,7 @@ public class PlayAgainManager implements Runnable {
         for (String winner : winners) {
             scoreCounter.incrementPlayer(winner);
         }
+        scoreCounter.incrementGames();
         System.out.println("Estatisticas: ");
         scoreCounter.print();
         System.out.println();

@@ -121,8 +121,9 @@ public class GameInstance implements Runnable {
             System.out.printf("Current bet: %f\n", currentBet);
             while (!game.everyoneBetted()) {
                 System.out.printf("%s - %f\n", currentPlayer.getUsername(), currentPlayer.getBet());
-                if(currentPlayer.getStatus() != PlayerStatus.PLAYING ||
-                        currentPlayer.getBet() == currentBet && game.everyoneBetted()) {
+//                if(currentPlayer.getStatus() != PlayerStatus.PLAYING ||
+//                        currentPlayer.getBet() == currentBet && game.everyoneBetted()) {
+                if(currentPlayer.getStatus() != PlayerStatus.PLAYING || currentPlayer.isBetted()) {
                     currentPlayer = playerQueue.dequeue();
                     game.setTurn(currentPlayer.getUsername());
                     continue;
@@ -158,6 +159,7 @@ public class GameInstance implements Runnable {
                     if(greater < player.getBet())
                         greater = player.getBet();
                 }
+                game.unbet(greater);
                 newBet = true;
                 currentBet = greater;
             }

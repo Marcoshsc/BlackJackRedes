@@ -75,12 +75,20 @@ public class Game {
 
     public boolean everyoneBetted() {
         for (Player player : players) {
+            System.out.println(player.getUsername() + " " + player.getStatus() + " " + player.isBetted());
             if(player.getStatus() != PlayerStatus.PLAYING)
                 continue;
             if(!player.isBetted())
                 return false;
         }
         return true;
+    }
+
+    public void unbet(double currentBet) {
+        for (Player player : players) {
+            if(player.getBet() < currentBet)
+                player.setBetted(false);
+        }
     }
 
     public String getStage() {
