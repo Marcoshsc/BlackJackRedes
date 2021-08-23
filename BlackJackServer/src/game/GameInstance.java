@@ -31,7 +31,7 @@ public class GameInstance implements Runnable {
         try {
             int i = 0;
             do {
-                if(i == 0 || !game.shouldCalculateWinners()) {
+                if(i == 0 || !game.shouldCalculateWinners(false)) {
                     makeBetPhase();
                 }
 
@@ -49,7 +49,7 @@ public class GameInstance implements Runnable {
                         break;
                     }
                 }
-                if(game.shouldCalculateWinners()) {
+                if(game.shouldCalculateWinners(true)) {
                     List<Player> winners = game.getWinners(false);
                     System.out.println("O jogo acabou!");
                     game.gameWon(winners);

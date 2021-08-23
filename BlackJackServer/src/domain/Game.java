@@ -107,16 +107,18 @@ public class Game {
         this.currentBet = currentBet;
     }
 
-    public boolean shouldCalculateWinners() {
-        boolean should = true;
+    public boolean shouldCalculateWinners(boolean trueEnd) {
+        boolean should = trueEnd;
         for (Player player : players) {
             if(player.getStatus() != PlayerStatus.PLAYING)
                 continue;
             if(player.getValue() == 21)
                 return true;
-            if (player.getLastDecision() == null || player.getLastDecision().equals("draw")) {
-                should = false;
-                break;
+            if(trueEnd) {
+                if (player.getLastDecision() == null || player.getLastDecision().equals("draw")) {
+                    should = false;
+                    break;
+                }
             }
         }
         return should;
