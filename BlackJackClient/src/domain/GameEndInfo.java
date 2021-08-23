@@ -36,7 +36,6 @@ public class GameEndInfo {
 
             @Override
             public GameEndInfo fromTransferString(String transferString) {
-                System.out.println(transferString);
                 String[] values = transferString.split("-");
                 return new GameEndInfo(values[0].equals("") ? new ArrayList<>() : Arrays.asList(values[0].split(",")),
                         Integer.parseInt(values[1]), Integer.parseInt(values[2]));

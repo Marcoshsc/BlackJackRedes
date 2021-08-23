@@ -34,7 +34,7 @@ public class GameInstance implements Runnable {
                 makeBetPhase();
 
                 if(i == 0) {
-                    List<Player> winners = game.getWinners();
+                    List<Player> winners = game.getWinners(true);
                     System.out.println(game.isCroupietWon());
                     if(game.isCroupietWon()) {
                         game.gameWon(winners);
@@ -48,7 +48,7 @@ public class GameInstance implements Runnable {
                     }
                 }
                 if(game.shouldCalculateWinners()) {
-                    List<Player> winners = game.getWinners();
+                    List<Player> winners = game.getWinners(false);
                     System.out.println("O jogo acabou!");
                     game.gameWon(winners);
                     communicateGameEnd(winners);
@@ -119,7 +119,7 @@ public class GameInstance implements Runnable {
         do {
             newBet = false;
             System.out.printf("Current bet: %f\n", currentBet);
-            for (int i = 0; i < game.getValidPlayers(); i++) {
+            while (!game.everyoneBetted()) {
                 System.out.printf("%s - %f\n", currentPlayer.getUsername(), currentPlayer.getBet());
                 if(currentPlayer.getStatus() != PlayerStatus.PLAYING ||
                         currentPlayer.getBet() == currentBet && game.everyoneBetted()) {
@@ -144,7 +144,7 @@ public class GameInstance implements Runnable {
                         newBet = true;
                     }
                 }
-                if(i != game.getValidPlayers() - 1) {
+                if(!game.everyoneBetted()) {
                     currentPlayer = playerQueue.dequeue();
                     game.setTurn(currentPlayer.getUsername());
                 }

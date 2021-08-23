@@ -78,6 +78,8 @@ public class Player {
     }
 
     public void reset() {
+        lastDecision = null;
+        betted = false;
         bet = 0;
         status = PlayerStatus.PLAYING;
     }

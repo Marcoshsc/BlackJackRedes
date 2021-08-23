@@ -4,13 +4,10 @@ import communication.CommunicationAnswer;
 import communication.CommunicationHandler;
 import communication.CommunicationTypes;
 import domain.*;
-import domain.enums.PlayerStatus;
 import main.ConnectionHandler;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Scanner;
 
 public class GameRunner implements Runnable {
@@ -49,8 +46,14 @@ public class GameRunner implements Runnable {
                 if(game.getStage().equals("bet") && game.getTurn().equals(player.getUsername())) {
                     System.out.printf("Fase de apostas! O maior valor apostado foi %f, sua aposta foi %f e você precisa igualar se quiser continuar jogando.\n",
                             game.getCurrentBet(), player.getBet());
-                    System.out.println("Vai betar quanto? Pra correr digite -1.");
-                    double bet = scanner.nextDouble();
+                    System.out.println("Vai apostar quanto? Pra correr digite -1. Lembrando que o valor é somado ao que você já apostou.");
+                    double bet;
+                    do {
+                        bet = scanner.nextDouble();
+                        if(bet != -1 && bet + player.getBet() < game.getCurrentBet()) {
+                            System.out.println("Pelo menos precisa completar a aposta atual, se não aguentar corre!");
+                        }
+                    } while(bet != -1 && bet + player.getBet() < game.getCurrentBet());
                     CommunicationHandler.of(connectionHandler).sendMessage(CommunicationTypes.RAISE_DECISION,
                             RaiseDecision.networkTransferable(), new RaiseDecision(bet, bet == -1));
                 }

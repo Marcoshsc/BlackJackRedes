@@ -34,12 +34,14 @@ public class Game {
     public void reset() {
         this.deck = new Deck();
         for (Player player : getPlayers()) {
+            player.reset();
             player.getCards().clear();
             drawCard(player);
             drawCard(player);
         }
         this.croupietCard = deck.getCard();
         this.croupietSecondCard = deck.getCard();
+        this.croupietCards.clear();
         this.croupietCards.add(croupietCard);
         this.croupietCards.add(croupietSecondCard);
         this.stage = null;
@@ -73,6 +75,8 @@ public class Game {
 
     public boolean everyoneBetted() {
         for (Player player : players) {
+            if(player.getStatus() != PlayerStatus.PLAYING)
+                continue;
             if(!player.isBetted())
                 return false;
         }
@@ -118,17 +122,16 @@ public class Game {
     }
 
     public int croupietValue(List<Card> cards) {
-        return 21;
-//        int value1 = 0;
-//        int value2 = 0;
-//        for (Card card: cards) {
-//            value1 += card.getFaces().getValue1();
-//            value2 += card.getFaces().getValue2();
-//        }
-//        if(value1 <= 21 || value2 <= 21) {
-//            return Math.max(value2, value1);
-//        }
-//        return Math.min(value1, value2);
+        int value1 = 0;
+        int value2 = 0;
+        for (Card card: cards) {
+            value1 += card.getFaces().getValue1();
+            value2 += card.getFaces().getValue2();
+        }
+        if(value1 <= 21 || value2 <= 21) {
+            return Math.max(value2, value1);
+        }
+        return Math.min(value1, value2);
     }
 
     public void gameWon(List<Player> winners) {
@@ -162,7 +165,7 @@ public class Game {
         }
     }
 
-    public List<Player> getWinners() {
+    public List<Player> getWinners(boolean start) {
         croupietWon = croupietBlackJack();
         int croupietPoints = croupietValue(Arrays.asList(croupietCard, croupietSecondCard));
         croupietWon = croupietWon || croupietPoints == 21;
@@ -181,6 +184,9 @@ public class Game {
                     croupietWon = true;
             }
         }
+        if(start) {
+            return winners;
+        }
         if(winners.isEmpty() && !croupietWon) {
             int greater = -1;
             for(Player player : players) {
@@ -189,9 +195,7 @@ public class Game {
                     greater = score;
                 }
             }
-            System.out.println(greater + " Greater");
             int newCroupietPoints = croupietPoints;
-            System.out.println("Drawing for croupiet");
             while(newCroupietPoints < greater) {
                 System.out.println(newCroupietPoints);
                 Card card = deck.getCard();
@@ -203,11 +207,8 @@ public class Game {
                     newCroupietPoints += card.getFaces().getValue2();
                 }
             }
-            System.out.println("stopped drawing");
-            System.out.println(newCroupietPoints);
-            System.out.println(greater);
             if(newCroupietPoints > 21 || newCroupietPoints == greater) {
-                croupietWon = true;
+                croupietWon = croupietWon || (newCroupietPoints == greater) || (newCroupietPoints > greater && newCroupietPoints <= 21);
                 for (Player player : players) {
                     if (player.getValue() == greater) {
                         winners.add(player);
